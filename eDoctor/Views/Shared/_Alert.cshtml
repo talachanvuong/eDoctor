@@ -1,0 +1,21 @@
+﻿@if (TempData.HasAlert())
+{
+    <div class="alert @TempData["AlertType"] position-absolute bottom-0 ms-3 fade show" id="alert">
+        @TempData["AlertMessage"]
+    </div>
+
+    <script id="alert-script">
+        setTimeout(() => {
+            const alertElement = document.getElementById('alert')
+            const scriptElement = document.getElementById('alert-script')
+
+            if (alertElement) {
+                alertElement.remove()
+            }
+
+            if (scriptElement) {
+                scriptElement.remove()
+            }
+        }, @TempData["AlertDelay"])
+    </script>
+}

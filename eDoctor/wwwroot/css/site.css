@@ -1,0 +1,20 @@
+﻿.full-height {
+    height: calc(100vh - 57px);
+}
+
+.full-image {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: 50% 20%;
+}
+
+.validation-summary-errors ul {
+    margin: 0;
+    padding: 0;
+}
+
+.validation-summary-errors li {
+    list-style: none;
+}

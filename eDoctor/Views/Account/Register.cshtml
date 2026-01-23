@@ -1,0 +1,56 @@
+﻿@model RegisterViewModel
+
+<div class="container my-5">
+    <div class="card w-50 mx-auto">
+        <div class="card-body">
+            <h2 class="card-title text-center">REGISTER</h2>
+            <p class="card-text text-center">
+                Do you already have an account?
+                <a class="link-primary fw-bold" asp-controller="Account" asp-action="Login">LOGIN</a>
+            </p>
+
+            <form method="post" asp-controller="Account" asp-action="Register">
+                <div class="mb-3">
+                    <label class="form-label" asp-for="FullName"></label>
+                    <input class="form-control" asp-for="FullName" />
+                    <span class="text-danger" asp-validation-for="FullName"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label" asp-for="BirthDate"></label>
+                    <input class="form-control" type="date" asp-for="BirthDate" />
+                    <span class="text-danger" asp-validation-for="BirthDate"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label" asp-for="Sex"></label>
+                    <select class="form-select" asp-for="Sex">
+                        <option value="false">Male</option>
+                        <option value="true">Female</option>
+                    </select>
+                    <span class="text-danger" asp-validation-for="Sex"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label" asp-for="LoginName"></label>
+                    <input class="form-control" type="text" asp-for="LoginName" />
+                    <span class="text-danger" asp-validation-for="LoginName"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label" asp-for="Password"></label>
+                    <input class="form-control" type="password" asp-for="Password" />
+                    <span class="text-danger" asp-validation-for="Password"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label" asp-for="ConfirmPassword"></label>
+                    <input class="form-control" type="password" asp-for="ConfirmPassword" />
+                    <span class="text-danger" asp-validation-for="ConfirmPassword"></span>
+                </div>
+
+                <button class="btn btn-primary w-100" type="submit">SUBMIT</button>
+            </form>
+        </div>
+    </div>
+</div>
