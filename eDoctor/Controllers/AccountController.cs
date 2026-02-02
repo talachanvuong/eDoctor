@@ -2,10 +2,12 @@
 using eDoctor.Helpers;
 using eDoctor.Helpers.ExtensionMethods;
 using eDoctor.Interfaces;
+using eDoctor.Models;
 using eDoctor.Models.Dtos.User;
 using eDoctor.Models.ViewModels.User;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Globalization;
 
 namespace eDoctor.Controllers;
 
@@ -94,9 +96,20 @@ public class AccountController : Controller
 
     [HttpGet]
     [Authorize(Roles = RoleTypes.User)]
-    public IActionResult Profile()
+    public async Task<IActionResult> Profile()
     {
-        return View();
+        string loginName = User.GetLoginName();
+
+        User user = await _userService.GetCurrentAsync(loginName);
+
+        ProfileViewModel vm = new ProfileViewModel
+        {
+            FullName = user.FullName,
+            BirthDate = user.BirthDate.ToString("d", CultureInfo.GetCultureInfo("en-US")),
+            Sex = user.Sex ? "Female" : "Male",
+        };
+
+        return View(vm);
     }
 
     [HttpPost]
@@ -104,7 +117,30 @@ public class AccountController : Controller
     public async Task<IActionResult> Logout()
     {
         await _authService.LogoutAsync();
-        
+
         return RedirectToAction("Login", "Account");
+    }
+
+    [HttpPost]
+    [Authorize(Roles = RoleTypes.User)]
+    public async Task<IActionResult> Profile(ProfileViewModel vm)
+    {
+        if (!ModelState.IsValid)
+        {
+            return View(vm);
+        }
+
+        string loginName = User.GetLoginName();
+
+        UpdateDto dto = new UpdateDto
+        {
+            FullName = vm.FullName,
+        };
+
+        await _userService.UpdateAsync(loginName, dto);
+
+        TempData.SetAlert("Update successfully!", AlertTypes.Success);
+
+        return RedirectToAction("Profile", "Account");
     }
 }

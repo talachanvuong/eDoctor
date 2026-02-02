@@ -41,7 +41,7 @@ public class UserService : IUserService
 
     public async Task<bool> CheckPasswordAsync(string loginName, string password)
     {
-        User? user = await _context.Users.SingleOrDefaultAsync(u => u.LoginName == loginName);
+        User? user = await _context.Users.FirstOrDefaultAsync(u => u.LoginName == loginName);
 
         if (user == null)
         {
@@ -49,5 +49,19 @@ public class UserService : IUserService
         }
 
         return _passwordService.Verify(password, user.Password);
+    }
+
+    public async Task<User> GetCurrentAsync(string loginName)
+    {
+        return await _context.Users.FirstAsync(u => u.LoginName == loginName);
+    }
+
+    public async Task UpdateAsync(string loginName, UpdateDto dto)
+    {
+        User user = await _context.Users.FirstAsync(u => u.LoginName == loginName);
+
+        user.FullName = dto.FullName;
+
+        await _context.SaveChangesAsync();
     }
 }

@@ -1,1 +1,33 @@
-﻿<h1>Profile</h1>
+﻿@model ProfileViewModel
+
+<div class="container my-5">
+    <div class="card w-50 mx-auto">
+        <div class="card-body">
+            <h2 class="card-title">Detailed Profile</h2>
+
+            <form method="post" asp-controller="Account" asp-action="Profile">
+                <div class="mb-3">
+                    <div class="input-group">
+                        <label class="input-group-text" asp-for="FullName"></label>
+                        <input class="form-control" type="text" asp-for="FullName" />
+                    </div>
+                    <span class="text-danger" asp-validation-for="FullName"></span>
+                </div>
+                
+                <div class="input-group mb-3">
+                    <label class="input-group-text" asp-for="BirthDate"></label>
+                    <input class="form-control" type="text" asp-for="BirthDate" readonly />
+                </div>
+
+                <div class="input-group mb-3">
+                    <label class="input-group-text" asp-for="Sex"></label>
+                    <input class="form-control" type="text" asp-for="Sex" readonly />
+                </div>
+
+                <button class="btn btn-primary w-50 mx-auto d-block" type="submit">EDIT PROFILE</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+@await Html.PartialAsync("_Alert")
