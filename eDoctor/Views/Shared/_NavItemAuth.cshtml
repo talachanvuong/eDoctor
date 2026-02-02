@@ -4,8 +4,34 @@
         99
     </a>
 </li>
-<li class="nav-item">
-    <a class="btn btn-primary" asp-controller="Account" asp-action="Profile">
+<li class="nav-item dropdown">
+    <a class="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown" asp-controller="Account" asp-action="Profile">
         <i class="bi bi-person-circle"></i>
     </a>
+    <ul class="dropdown-menu dropdown-menu-end">
+        <li>
+            <a class="dropdown-item" asp-controller="Account" asp-action="Profile">
+                Profile
+            </a>
+        </li>
+        <li>
+            <a class="dropdown-item text-danger cursor-pointer" onclick="logout()">
+                Logout
+            </a>
+        </li>
+    </ul>
 </li>
+
+<form id="logout-form" method="post" asp-controller="Account" asp-action="Logout"></form>
+
+<script>
+    const logout = () => {
+        const logoutForm = document.getElementById('logout-form')
+
+        if (!logoutForm) {
+            throw new Error("Missing logout form")
+        }
+
+        logoutForm.submit()
+    }
+</script>

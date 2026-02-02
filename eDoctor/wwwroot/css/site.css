@@ -18,3 +18,7 @@
 .validation-summary-errors li {
     list-style: none;
 }
+
+.cursor-pointer {
+    cursor: pointer;
+}

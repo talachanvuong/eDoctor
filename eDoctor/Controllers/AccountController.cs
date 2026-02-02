@@ -98,4 +98,13 @@ public class AccountController : Controller
     {
         return View();
     }
+
+    [HttpPost]
+    [Authorize(Roles = RoleTypes.User)]
+    public async Task<IActionResult> Logout()
+    {
+        await _authService.LogoutAsync();
+        
+        return RedirectToAction("Login", "Account");
+    }
 }
