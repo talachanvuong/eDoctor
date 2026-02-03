@@ -143,4 +143,42 @@ public class AccountController : Controller
 
         return RedirectToAction("Profile", "Account");
     }
+
+    [HttpGet]
+    [Authorize(Roles = RoleTypes.User)]
+    public IActionResult ChangePassword()
+    {
+        return View();
+    }
+
+    [HttpPost]
+    [Authorize(Roles = RoleTypes.User)]
+    public async Task<IActionResult> ChangePassword(ChangePasswordViewModel vm)
+    {
+        if (!ModelState.IsValid)
+        {
+            return View(vm);
+        }
+
+        string loginName = User.GetLoginName();
+
+        if (!(await _userService.CheckPasswordAsync(loginName, vm.OldPassword)))
+        {
+            ModelState.AddModelError(nameof(ChangePasswordViewModel.OldPassword), "Wrong old password.");
+
+            return View(vm);
+        }
+
+        ChangePasswordDto dto = new ChangePasswordDto
+        {
+            NewPassword = vm.NewPassword
+        };
+
+        await _userService.ChangePasswordAsync(loginName, dto);
+        await _authService.LogoutAsync();
+
+        TempData.SetAlert("Change password successfully!", AlertTypes.Success);
+
+        return RedirectToAction("Login", "Account");
+    }
 }

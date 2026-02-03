@@ -64,4 +64,13 @@ public class UserService : IUserService
 
         await _context.SaveChangesAsync();
     }
+
+    public async Task ChangePasswordAsync(string loginName, ChangePasswordDto dto)
+    {
+        User user = await _context.Users.FirstAsync(u => u.LoginName == loginName);
+
+        user.Password = _passwordService.Hash(dto.NewPassword);
+
+        await _context.SaveChangesAsync();
+    }
 }

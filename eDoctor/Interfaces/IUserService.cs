@@ -10,4 +10,5 @@ public interface IUserService
     Task<bool> CheckPasswordAsync(string loginName, string password);
     Task<User> GetCurrentAsync(string loginName);
     Task UpdateAsync(string loginName, UpdateDto dto);
+    Task ChangePasswordAsync(string loginName, ChangePasswordDto dto);
 }
