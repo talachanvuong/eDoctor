@@ -33,8 +33,6 @@ public class RegisterViewModel
 
     [Display(Name = "Confirm password")]
     [Required]
-    [Password]
-    [StringLength(32, MinimumLength = 8)]
     [Compare("Password")]
     public string ConfirmPassword { get; set; } = null!;
 }

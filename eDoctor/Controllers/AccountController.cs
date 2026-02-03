@@ -94,6 +94,15 @@ public class AccountController : Controller
         return RedirectToAction("Login", "Account");
     }
 
+    [HttpPost]
+    [Authorize(Roles = RoleTypes.User)]
+    public async Task<IActionResult> Logout()
+    {
+        await _authService.LogoutAsync();
+
+        return RedirectToAction("Login", "Account");
+    }
+
     [HttpGet]
     [Authorize(Roles = RoleTypes.User)]
     public async Task<IActionResult> Profile()
@@ -106,19 +115,10 @@ public class AccountController : Controller
         {
             FullName = user.FullName,
             BirthDate = user.BirthDate.ToString("d", CultureInfo.GetCultureInfo("en-US")),
-            Sex = user.Sex ? "Female" : "Male",
+            Sex = user.Sex ? "Female" : "Male"
         };
 
         return View(vm);
-    }
-
-    [HttpPost]
-    [Authorize(Roles = RoleTypes.User)]
-    public async Task<IActionResult> Logout()
-    {
-        await _authService.LogoutAsync();
-
-        return RedirectToAction("Login", "Account");
     }
 
     [HttpPost]
@@ -134,7 +134,7 @@ public class AccountController : Controller
 
         UpdateDto dto = new UpdateDto
         {
-            FullName = vm.FullName,
+            FullName = vm.FullName
         };
 
         await _userService.UpdateAsync(loginName, dto);
