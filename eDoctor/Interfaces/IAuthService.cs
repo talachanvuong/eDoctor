@@ -2,6 +2,6 @@
 
 public interface IAuthService
 {
-    Task LoginAsync(string loginName, string role);
+    Task LoginAsync(int id, string role);
     Task LogoutAsync();
 }

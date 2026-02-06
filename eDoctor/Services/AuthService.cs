@@ -14,11 +14,11 @@ public class AuthService : IAuthService
         _httpContextAccessor = httpContextAccessor;
     }
 
-    public async Task LoginAsync(string loginName, string role)
+    public async Task LoginAsync(int id, string role)
     {
         List<Claim> claims = new List<Claim>
         {
-            new Claim(ClaimTypes.Name, loginName),
+            new Claim(ClaimTypes.NameIdentifier, id.ToString()),
             new Claim(ClaimTypes.Role, role)
         };
 

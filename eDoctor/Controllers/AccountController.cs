@@ -38,14 +38,16 @@ public class AccountController : Controller
             return View(vm);
         }
 
-        if (!(await _userService.CheckPasswordAsync(vm.LoginName, vm.Password)))
+        User? user = await _userService.CheckPasswordAsync(vm.LoginName, vm.Password);
+
+        if (user == null)
         {
             ModelState.AddModelError("", "Invalid login name or password.");
 
             return View(vm);
         }
 
-        await _authService.LoginAsync(vm.LoginName, RoleTypes.User);
+        await _authService.LoginAsync(user.UserId, RoleTypes.User);
 
         TempData.SetAlert("Login successful!", AlertTypes.Success);
 
@@ -107,9 +109,9 @@ public class AccountController : Controller
     [Authorize(Roles = RoleTypes.User)]
     public async Task<IActionResult> Profile()
     {
-        string loginName = User.GetLoginName();
+        int userId = User.GetId();
 
-        User user = await _userService.GetCurrentAsync(loginName);
+        User user = await _userService.GetCurrentAsync(userId);
 
         ProfileViewModel vm = new ProfileViewModel
         {
@@ -130,14 +132,14 @@ public class AccountController : Controller
             return View(vm);
         }
 
-        string loginName = User.GetLoginName();
+        int userId = User.GetId();
 
         UpdateDto dto = new UpdateDto
         {
             FullName = vm.FullName
         };
 
-        await _userService.UpdateAsync(loginName, dto);
+        await _userService.UpdateAsync(userId, dto);
 
         TempData.SetAlert("Update successfully!", AlertTypes.Success);
 
@@ -160,9 +162,9 @@ public class AccountController : Controller
             return View(vm);
         }
 
-        string loginName = User.GetLoginName();
+        int userId = User.GetId();
 
-        if (!(await _userService.CheckPasswordAsync(loginName, vm.OldPassword)))
+        if (!await _userService.CheckPasswordAsync(userId, vm.OldPassword))
         {
             ModelState.AddModelError(nameof(ChangePasswordViewModel.OldPassword), "Wrong old password.");
 
@@ -174,7 +176,7 @@ public class AccountController : Controller
             NewPassword = vm.NewPassword
         };
 
-        await _userService.ChangePasswordAsync(loginName, dto);
+        await _userService.ChangePasswordAsync(userId, dto);
         await _authService.LogoutAsync();
 
         TempData.SetAlert("Change password successfully!", AlertTypes.Success);

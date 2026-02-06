@@ -4,15 +4,15 @@ namespace eDoctor.Helpers.ExtensionMethods;
 
 public static class ClaimHelper
 {
-    public static string GetLoginName(this ClaimsPrincipal principal)
+    public static int GetId(this ClaimsPrincipal principal)
     {
-        Claim? loginNameClaim = principal.FindFirst(ClaimTypes.Name);
+        Claim? idClaim = principal.FindFirst(ClaimTypes.NameIdentifier);
 
-        if (loginNameClaim == null)
+        if (idClaim == null)
         {
-            throw new Exception("Missing login name claim");
+            throw new Exception("Missing id claim");
         }
 
-        return loginNameClaim.Value;
+        return int.Parse(idClaim.Value);
     }
 }
