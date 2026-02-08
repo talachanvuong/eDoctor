@@ -1,6 +1,6 @@
-﻿namespace eDoctor.Models.Dtos.User;
+﻿namespace eDoctor.Models.Dtos.User.Queries;
 
-public class RegisterDto
+public class RegisterQueryDto
 {
     public string FullName { get; set; } = null!;
     public DateTime BirthDate { get; set; }

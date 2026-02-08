@@ -1,14 +1,15 @@
 ﻿using eDoctor.Models.Dtos.User;
+using eDoctor.Models.Dtos.User.Queries;
+using eDoctor.Results;
 
 namespace eDoctor.Interfaces;
 
 public interface IUserService
 {
-    Task AddAsync(RegisterDto dto);
-    Task<bool> ExistsByLoginNameAsync(string loginName);
-    Task<IdDto?> CheckPasswordAsync(string loginName, string password);
-    Task<bool> CheckPasswordAsync(int userId, string password);
-    Task<ProfileDto> GetProfileAsync(int userId);
-    Task UpdateAsync(int userId, UpdateDto dto);
-    Task ChangePasswordAsync(int userId, ChangePasswordDto dto);
+    Task<Result> AddAsync(RegisterQueryDto dto);
+    Task<ProfileDto> GetProfileAsync(ProfileQueryDto dto);
+    Task UpdateAsync(UpdateQueryDto dto);
+    Task<Result> ChangePasswordAsync(ChangePasswordQueryDto dto);
+    Task<Result> LoginAsync(LoginQueryDto dto);
+    Task LogoutAsync();
 }

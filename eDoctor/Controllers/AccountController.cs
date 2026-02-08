@@ -2,9 +2,10 @@
 using eDoctor.Helpers;
 using eDoctor.Helpers.ExtensionMethods;
 using eDoctor.Interfaces;
-using eDoctor.Models;
 using eDoctor.Models.Dtos.User;
+using eDoctor.Models.Dtos.User.Queries;
 using eDoctor.Models.ViewModels.User;
+using eDoctor.Results;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Globalization;
@@ -14,12 +15,10 @@ namespace eDoctor.Controllers;
 public class AccountController : Controller
 {
     private readonly IUserService _userService;
-    private readonly IAuthService _authService;
 
-    public AccountController(IUserService userService, IAuthService authService)
+    public AccountController(IUserService userService)
     {
         _userService = userService;
-        _authService = authService;
     }
 
     [HttpGet]
@@ -38,16 +37,20 @@ public class AccountController : Controller
             return View(vm);
         }
 
-        IdDto? user = await _userService.CheckPasswordAsync(vm.LoginName, vm.Password);
-
-        if (user == null)
+        LoginQueryDto dto = new LoginQueryDto
         {
-            ModelState.AddModelError("", "Invalid login name or password.");
+            LoginName = vm.LoginName,
+            Password = vm.Password
+        };
+
+        Result result = await _userService.LoginAsync(dto);
+
+        if (!result.IsSuccess)
+        {
+            ModelState.AddModelError("", result.Error!);
 
             return View(vm);
         }
-
-        await _authService.LoginAsync(user.UserId, RoleTypes.User);
 
         TempData.SetAlert("Login successful!", AlertTypes.Success);
 
@@ -70,17 +73,7 @@ public class AccountController : Controller
             return View(vm);
         }
 
-        if (await _userService.ExistsByLoginNameAsync(vm.LoginName))
-        {
-            string key = nameof(RegisterViewModel.LoginName);
-            string displayName = DisplayHelper.GetDislayName<RegisterViewModel>(key);
-
-            ModelState.AddModelError(key, $"{displayName} already exists.");
-
-            return View(vm);
-        }
-
-        RegisterDto dto = new RegisterDto
+        RegisterQueryDto dto = new RegisterQueryDto
         {
             FullName = vm.FullName,
             BirthDate = vm.BirthDate,
@@ -89,7 +82,14 @@ public class AccountController : Controller
             Password = vm.Password
         };
 
-        await _userService.AddAsync(dto);
+        Result result = await _userService.AddAsync(dto);
+
+        if (!result.IsSuccess)
+        {
+            ModelState.AddModelError("", result.Error!);
+
+            return View(vm);
+        }
 
         TempData.SetAlert("Registration successful!", AlertTypes.Success);
 
@@ -100,7 +100,9 @@ public class AccountController : Controller
     [Authorize(Roles = RoleTypes.User)]
     public async Task<IActionResult> Logout()
     {
-        await _authService.LogoutAsync();
+        await _userService.LogoutAsync();
+
+        TempData.SetAlert("Logout successfully!", AlertTypes.Success);
 
         return RedirectToAction("Login", "Account");
     }
@@ -109,9 +111,12 @@ public class AccountController : Controller
     [Authorize(Roles = RoleTypes.User)]
     public async Task<IActionResult> Profile()
     {
-        int userId = User.GetId();
+        ProfileQueryDto dto = new ProfileQueryDto
+        {
+            UserId = User.GetId()
+        };
 
-        ProfileDto user = await _userService.GetProfileAsync(userId);
+        ProfileDto user = await _userService.GetProfileAsync(dto);
 
         ProfileViewModel vm = new ProfileViewModel
         {
@@ -132,14 +137,13 @@ public class AccountController : Controller
             return View(vm);
         }
 
-        int userId = User.GetId();
-
-        UpdateDto dto = new UpdateDto
+        UpdateQueryDto dto = new UpdateQueryDto
         {
+            UserId = User.GetId(),
             FullName = vm.FullName
         };
 
-        await _userService.UpdateAsync(userId, dto);
+        await _userService.UpdateAsync(dto);
 
         TempData.SetAlert("Update successfully!", AlertTypes.Success);
 
@@ -162,22 +166,21 @@ public class AccountController : Controller
             return View(vm);
         }
 
-        int userId = User.GetId();
-
-        if (!await _userService.CheckPasswordAsync(userId, vm.OldPassword))
+        ChangePasswordQueryDto dto = new ChangePasswordQueryDto
         {
-            ModelState.AddModelError(nameof(ChangePasswordViewModel.OldPassword), "Wrong old password.");
-
-            return View(vm);
-        }
-
-        ChangePasswordDto dto = new ChangePasswordDto
-        {
+            UserId = User.GetId(),
+            OldPassword = vm.OldPassword,
             NewPassword = vm.NewPassword
         };
 
-        await _userService.ChangePasswordAsync(userId, dto);
-        await _authService.LogoutAsync();
+        Result result = await _userService.ChangePasswordAsync(dto);
+
+        if (!result.IsSuccess)
+        {
+            ModelState.AddModelError("", result.Error!);
+
+            return View(vm);
+        }
 
         TempData.SetAlert("Change password successfully!", AlertTypes.Success);
 

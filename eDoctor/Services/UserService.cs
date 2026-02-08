@@ -1,30 +1,38 @@
 ﻿using eDoctor.Data;
+using eDoctor.Helpers;
 using eDoctor.Interfaces;
 using eDoctor.Models;
 using eDoctor.Models.Dtos.User;
+using eDoctor.Models.Dtos.User.Queries;
+using eDoctor.Results;
 using Microsoft.EntityFrameworkCore;
 
 namespace eDoctor.Services;
 
 public class UserService : IUserService
 {
-    private readonly IPasswordService _passwordService;
     private readonly ApplicationDbContext _context;
+    private readonly IPasswordService _passwordService;
+    private readonly IAuthService _authService;
 
-    public UserService(IPasswordService passwordService, ApplicationDbContext context)
+    public UserService(ApplicationDbContext context, IPasswordService passwordService, IAuthService authService)
     {
-        _passwordService = passwordService;
         _context = context;
+        _passwordService = passwordService;
+        _authService = authService;
     }
 
-    public async Task AddAsync(RegisterDto dto)
+    public async Task<Result> AddAsync(RegisterQueryDto dto)
     {
-        string hashedPassword = _passwordService.Hash(dto.Password);
+        if (await _context.Users.AnyAsync(u => u.LoginName == dto.LoginName))
+        {
+            return Result.Failure("User already exists.");
+        }
 
         User user = new User
         {
             LoginName = dto.LoginName,
-            Password = hashedPassword,
+            Password = _passwordService.Hash(dto.Password),
             FullName = dto.FullName,
             BirthDate = dto.BirthDate,
             Sex = dto.Sex
@@ -32,46 +40,14 @@ public class UserService : IUserService
 
         await _context.Users.AddAsync(user);
         await _context.SaveChangesAsync();
+
+        return Result.Success();
     }
 
-    public async Task<bool> ExistsByLoginNameAsync(string loginName)
-    {
-        return await _context.Users.AnyAsync(u => u.LoginName == loginName);
-    }
-
-    public async Task<IdDto?> CheckPasswordAsync(string loginName, string password)
-    {
-        User? user = await _context.Users.FirstOrDefaultAsync(u => u.LoginName == loginName);
-
-        if (user == null)
-        {
-            return null;
-        }
-
-        if (!_passwordService.Verify(password, user.Password))
-        {
-            return null;
-        }
-
-        IdDto dto = new IdDto
-        {
-            UserId = user.UserId
-        };
-
-        return dto;
-    }
-
-    public async Task<bool> CheckPasswordAsync(int userId, string password)
-    {
-        User user = await _context.Users.FirstAsync(u => u.UserId == userId);
-
-        return _passwordService.Verify(password, user.Password);
-    }
-
-    public async Task<ProfileDto> GetProfileAsync(int userId)
+    public async Task<ProfileDto> GetProfileAsync(ProfileQueryDto dto)
     {
         return await _context.Users
-            .Where(u => u.UserId == userId)
+            .Where(u => u.UserId == dto.UserId)
             .Select(u => new ProfileDto
             {
                 FullName = u.FullName,
@@ -81,21 +57,48 @@ public class UserService : IUserService
             .FirstAsync();
     }
 
-    public async Task UpdateAsync(int userId, UpdateDto dto)
+    public async Task UpdateAsync(UpdateQueryDto dto)
     {
-        User user = await _context.Users.FirstAsync(u => u.UserId == userId);
+        User user = await _context.Users.FirstAsync(u => u.UserId == dto.UserId);
 
         user.FullName = dto.FullName;
 
         await _context.SaveChangesAsync();
     }
 
-    public async Task ChangePasswordAsync(int userId, ChangePasswordDto dto)
+    public async Task<Result> ChangePasswordAsync(ChangePasswordQueryDto dto)
     {
-        User user = await _context.Users.FirstAsync(u => u.UserId == userId);
+        User user = await _context.Users.FirstAsync(u => u.UserId == dto.UserId);
+
+        if (!_passwordService.Verify(dto.OldPassword, user.Password))
+        {
+            return Result.Failure("Wrong old password.");
+        }
 
         user.Password = _passwordService.Hash(dto.NewPassword);
 
         await _context.SaveChangesAsync();
+        await _authService.LogoutAsync();
+
+        return Result.Success();
+    }
+
+    public async Task<Result> LoginAsync(LoginQueryDto dto)
+    {
+        User? user = await _context.Users.FirstOrDefaultAsync(u => u.LoginName == dto.LoginName);
+
+        if (user == null || !_passwordService.Verify(dto.Password, user.Password))
+        {
+            return Result.Failure("Invalid login name or password.");
+        }
+
+        await _authService.LoginAsync(user.UserId, RoleTypes.User);
+
+        return Result.Success();
+    }
+
+    public async Task LogoutAsync()
+    {
+        await _authService.LogoutAsync();
     }
 }

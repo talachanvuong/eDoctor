@@ -5,6 +5,7 @@ using System.Security.Claims;
 
 namespace eDoctor.Attributes;
 
+[AttributeUsage(AttributeTargets.Method, Inherited = false)]
 public class OnlyAnonymousAttribute : ActionFilterAttribute
 {
     public override void OnActionExecuting(ActionExecutingContext context)
