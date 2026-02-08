@@ -1,0 +1,40 @@
+﻿@model DepartmentBriefViewModel
+
+<div class="container my-5">
+    <form method="get" asp-controller="Home" asp-action="Doctors">
+        <div class="bg-primary rounded p-2 mb-3">
+            <select class="form-select" onchange="this.form.submit()" asp-for="DepartmentId">
+                @foreach (var d in Model.Departments)
+                {
+                    @if (d.DepartmentId == Model.DepartmentId)
+                    {
+                        <option value="@d.DepartmentId" selected>
+                            @d.DepartmentName
+                        </option>
+                    }
+                    else
+                    {
+                        <option value="@d.DepartmentId">
+                            @d.DepartmentName
+                        </option>
+                    }
+                }
+            </select>
+        </div>
+    </form>
+
+    <div class="row row-cols-4 g-3 text-center">
+        @foreach (var d in Model.Doctors)
+        {
+            <div class="col">
+                <div class="card">
+                    <img class="card-img-top" src="@d.Avatar">
+                    <div class="card-body">
+                        <h5 class="card-title text-truncate">@d.FullName</h5>
+                        <a class="btn btn-primary">View Profile</a>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
