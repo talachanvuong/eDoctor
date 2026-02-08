@@ -1,4 +1,8 @@
-﻿<!DOCTYPE html>
+﻿@{
+    bool useContainer = (bool?)ViewData["UseContainer"] ?? false;
+}
+
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
@@ -34,7 +38,16 @@
             </div>
         </nav>
 
-        @RenderBody()
+        @if (useContainer)
+        {
+            <div class="container my-5">
+                @RenderBody()
+            </div>
+        }
+        else
+        {
+            @RenderBody()
+        }
     </div>
 
     <div class="d-flex d-md-none vh-100 align-items-center justify-content-center text-center">
