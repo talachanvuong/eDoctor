@@ -39,7 +39,7 @@ public class UserService : IUserService
         return await _context.Users.AnyAsync(u => u.LoginName == loginName);
     }
 
-    public async Task<User?> CheckPasswordAsync(string loginName, string password)
+    public async Task<IdDto?> CheckPasswordAsync(string loginName, string password)
     {
         User? user = await _context.Users.FirstOrDefaultAsync(u => u.LoginName == loginName);
 
@@ -53,24 +53,37 @@ public class UserService : IUserService
             return null;
         }
 
-        return user;
+        IdDto dto = new IdDto
+        {
+            UserId = user.UserId
+        };
+
+        return dto;
     }
 
     public async Task<bool> CheckPasswordAsync(int userId, string password)
     {
-        User user = await GetCurrentAsync(userId);
+        User user = await _context.Users.FirstAsync(u => u.UserId == userId);
 
         return _passwordService.Verify(password, user.Password);
     }
 
-    public async Task<User> GetCurrentAsync(int userId)
+    public async Task<ProfileDto> GetProfileAsync(int userId)
     {
-        return await _context.Users.FirstAsync(u => u.UserId == userId);
+        return await _context.Users
+            .Where(u => u.UserId == userId)
+            .Select(u => new ProfileDto
+            {
+                FullName = u.FullName,
+                BirthDate = u.BirthDate,
+                Sex = u.Sex
+            })
+            .FirstAsync();
     }
 
     public async Task UpdateAsync(int userId, UpdateDto dto)
     {
-        User user = await GetCurrentAsync(userId);
+        User user = await _context.Users.FirstAsync(u => u.UserId == userId);
 
         user.FullName = dto.FullName;
 
@@ -79,7 +92,7 @@ public class UserService : IUserService
 
     public async Task ChangePasswordAsync(int userId, ChangePasswordDto dto)
     {
-        User user = await GetCurrentAsync(userId);
+        User user = await _context.Users.FirstAsync(u => u.UserId == userId);
 
         user.Password = _passwordService.Hash(dto.NewPassword);
 

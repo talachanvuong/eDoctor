@@ -38,7 +38,7 @@ public class AccountController : Controller
             return View(vm);
         }
 
-        User? user = await _userService.CheckPasswordAsync(vm.LoginName, vm.Password);
+        IdDto? user = await _userService.CheckPasswordAsync(vm.LoginName, vm.Password);
 
         if (user == null)
         {
@@ -111,7 +111,7 @@ public class AccountController : Controller
     {
         int userId = User.GetId();
 
-        User user = await _userService.GetCurrentAsync(userId);
+        ProfileDto user = await _userService.GetProfileAsync(userId);
 
         ProfileViewModel vm = new ProfileViewModel
         {
