@@ -1,21 +1,19 @@
 using eDoctor.Interfaces;
-using eDoctor.Models.Dtos.Department;
 using eDoctor.Models.Dtos.Doctor;
-using eDoctor.Models.ViewModels.Compound;
-using eDoctor.Models.ViewModels.Department;
+using eDoctor.Models.Dtos.Doctor.Fallbacks;
+using eDoctor.Models.Dtos.Doctor.Queries;
 using eDoctor.Models.ViewModels.Doctor;
+using eDoctor.Results;
 using Microsoft.AspNetCore.Mvc;
 
 namespace eDoctor.Controllers;
 
 public class HomeController : Controller
 {
-    private readonly IDepartmentService _departmentService;
     private readonly IDoctorService _doctorService;
 
-    public HomeController(IDepartmentService departmentService, IDoctorService doctorService)
+    public HomeController(IDoctorService doctorService)
     {
-        _departmentService = departmentService;
         _doctorService = doctorService;
     }
 
@@ -26,19 +24,32 @@ public class HomeController : Controller
     }
 
     [HttpGet]
-    public async Task<IActionResult> Doctors(DepartmentBriefViewModel vm)
+    public async Task<IActionResult> Doctors(DoctorsViewModel vm)
     {
-        IEnumerable<DepartmentDto> departments = await _departmentService.GetAllAsync();
+        DoctorsQueryDto dto = new DoctorsQueryDto
+        {
+            DepartmentId = vm.DepartmentId
+        };
 
-        vm.Departments = departments.Select(d => new DepartmentViewModel
+        Result<DoctorsDto, DoctorsFallbackDto> result = await _doctorService.GetByDepartmentAsync(dto);
+
+        if (!result.IsSuccess)
+        {
+            return RedirectToAction("Doctors", "Home", new
+            {
+                result.Fallback!.DepartmentId
+            });
+        }
+
+        DoctorsDto value = result.Value!;
+
+        vm.Departments = value.Departments.Select(d => new DepartmentViewModel
         {
             DepartmentId = d.DepartmentId,
             DepartmentName = d.DepartmentName
         });
 
-        IEnumerable<BriefDto> doctors = await _doctorService.GetByDepartmentAsync(vm.DepartmentId);
-
-        vm.Doctors = doctors.Select(d => new BriefViewModel
+        vm.Doctors = value.Doctors.Select(d => new BriefViewModel
         {
             DoctorId = d.DoctorId,
             Avatar = $"data:image/png;base64,{Convert.ToBase64String(d.Avatar)}",

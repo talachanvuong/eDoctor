@@ -33,3 +33,21 @@ public class Result<T> : Result
         Error = error
     };
 }
+
+public class Result<TValue, TFallback> : Result<TValue>
+{
+    public TFallback? Fallback { get; init; }
+
+    public new static Result<TValue, TFallback> Success(TValue value) => new()
+    {
+        IsSuccess = true,
+        Value = value
+    };
+
+    public static Result<TValue, TFallback> Failure(string error, TFallback fallback) => new()
+    {
+        IsSuccess = false,
+        Error = error,
+        Fallback = fallback
+    };
+}
