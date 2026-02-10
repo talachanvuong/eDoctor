@@ -34,7 +34,7 @@
                 <img class="card-img-top" src="@d.Avatar">
                 <div class="card-body">
                     <h5 class="card-title text-truncate">@d.FullName</h5>
-                    <a class="btn btn-primary">View Profile</a>
+                    <a class="btn btn-primary" asp-controller="Home" asp-action="AboutDoctor" asp-route-DoctorId="@d.DoctorId">View Profile</a>
                 </div>
             </div>
         </div>

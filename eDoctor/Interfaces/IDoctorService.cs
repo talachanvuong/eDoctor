@@ -8,4 +8,5 @@ namespace eDoctor.Interfaces;
 public interface IDoctorService
 {
     Task<Result<DoctorsDto, DoctorsFallbackDto>> GetByDepartmentAsync(DoctorsQueryDto dto);
+    Task<Result<AboutDto, AboutFallbackDto>> GetAboutAsync(AboutQueryDto dto);
 }

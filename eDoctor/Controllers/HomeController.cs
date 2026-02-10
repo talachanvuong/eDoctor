@@ -58,4 +58,50 @@ public class HomeController : Controller
 
         return View(vm);
     }
+
+    [HttpGet]
+    public async Task<IActionResult> AboutDoctor(AboutViewModel vm)
+    {
+        AboutQueryDto dto = new AboutQueryDto
+        {
+            DoctorId = vm.DoctorId
+        };
+
+        Result<AboutDto, AboutFallbackDto> result = await _doctorService.GetAboutAsync(dto);
+
+        if (!result.IsSuccess)
+        {
+            return RedirectToAction("AboutDoctor", "Home", new
+            {
+                result.Fallback!.DoctorId
+            });
+        }
+
+        AboutDto value = result.Value!;
+        DetailDto detail = value.Detail;
+
+        vm.Detail = new DetailViewModel
+        {
+            DoctorId = detail.DoctorId,
+            FullName = detail.FullName,
+            RankCode = detail.RankCode,
+            YearsOfExperience = detail.YearsOfExperience,
+            Avatar = $"data:image/png;base64,{Convert.ToBase64String(detail.Avatar)}",
+            DepartmentName = detail.DepartmentName,
+            Introductions = detail.Introductions.Select(i => new IntroductionViewModel
+            {
+                SectionTitle = i.SectionTitle,
+                Content = i.Content
+            })
+        };
+
+        vm.Others = value.Others.Select(d => new BriefViewModel
+        {
+            DoctorId = d.DoctorId,
+            Avatar = $"data:image/png;base64,{Convert.ToBase64String(d.Avatar)}",
+            FullName = d.FullName
+        });
+
+        return View(vm);
+    }
 }

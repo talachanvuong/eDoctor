@@ -1,0 +1,87 @@
+﻿@model AboutViewModel
+
+@{
+    ViewData["UseContainer"] = true;
+}
+
+<div class="text-center mb-4">
+    <h1 class="fw-bold text-primary">@Model.Detail.FullName</h1>
+    <h5 class="fw-semibold text-secondary">@Model.Detail.DepartmentName</h5>
+    <hr />
+</div>
+
+<div class="row">
+    <div class="col-4">
+        <div class="mb-4">
+            <img class="img-fluid rounded w-100" src="@Model.Detail.Avatar" />
+        </div>
+
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h5 class="card-title fw-bold">Profile details</h5>
+                <table class="table table-borderless mb-3">
+                    <tbody>
+                        <tr>
+                            <td class="fw-semibold">Academic rank:</td>
+                            <td>@Html.DisplayFor(m => m.Detail.RankCode)</td>
+                        </tr>
+
+                        <tr>
+                            <td class="fw-semibold">Experience:</td>
+                            <td>@Model.Detail.YearsOfExperience</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <form method="post">
+                    <button class="btn btn-primary w-100" type="submit">BOOK AN APPOINTMENT</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-8">
+        @for (int i = 0; i < Model.Detail.Introductions.Count(); i++)
+        {
+            var item = Model.Detail.Introductions.ElementAt(i);
+
+            <div class="mb-4">
+                <h5 class="fw-bold">@item.SectionTitle</h5>
+
+                @if (i == 0)
+                {
+                    <p class="text-justify">@item.Content</p>
+                }
+                else
+                {
+                    <ul>
+                        @foreach (var line in item.Content.Split('\n'))
+                        {
+                            <li>@line</li>
+                        }
+                    </ul>
+                }
+            </div>
+        }
+
+        <div>
+            <h5 class="fw-bold">Other doctors</h5>
+
+            <div class="list-group">
+                @foreach (var o in Model.Others)
+                {
+                    <a class="list-group-item list-group-item-action p-3" asp-controller="Home" asp-action="AboutDoctor" asp-route-DoctorId="@o.DoctorId">
+                        <div class="row g-3 align-items-center">
+                            <div class="col-auto">
+                                <img class="full-image rounded" src="@o.Avatar" style="width: 80px; height: 80px;">
+                            </div>
+                            <div class="col">
+                                <h6 class="mb-0">@o.FullName</h6>
+                            </div>
+                        </div>
+                    </a>
+                }
+            </div>
+        </div>
+    </div>
+</div>
