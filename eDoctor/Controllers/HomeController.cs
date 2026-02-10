@@ -1,3 +1,4 @@
+using eDoctor.Helpers.ExtensionMethods;
 using eDoctor.Interfaces;
 using eDoctor.Models.Dtos.Doctor;
 using eDoctor.Models.Dtos.Doctor.Fallbacks;
@@ -52,7 +53,7 @@ public class HomeController : Controller
         vm.Doctors = value.Doctors.Select(d => new BriefViewModel
         {
             DoctorId = d.DoctorId,
-            Avatar = $"data:image/png;base64,{Convert.ToBase64String(d.Avatar)}",
+            Avatar = d.Avatar.ConvertToString(),
             FullName = d.FullName
         });
 
@@ -86,7 +87,7 @@ public class HomeController : Controller
             FullName = detail.FullName,
             RankCode = detail.RankCode,
             YearsOfExperience = detail.YearsOfExperience,
-            Avatar = $"data:image/png;base64,{Convert.ToBase64String(detail.Avatar)}",
+            Avatar = detail.Avatar.ConvertToString(),
             DepartmentName = detail.DepartmentName,
             Introductions = detail.Introductions.Select(i => new IntroductionViewModel
             {
@@ -98,7 +99,7 @@ public class HomeController : Controller
         vm.Others = value.Others.Select(d => new BriefViewModel
         {
             DoctorId = d.DoctorId,
-            Avatar = $"data:image/png;base64,{Convert.ToBase64String(d.Avatar)}",
+            Avatar = d.Avatar.ConvertToString(),
             FullName = d.FullName
         });
 
