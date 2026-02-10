@@ -96,7 +96,7 @@ public class HomeController : Controller
             })
         };
 
-        vm.Others = value.Others.Select(d => new BriefViewModel
+        vm.Others = value.Others.Select(d => new OtherViewModel
         {
             DoctorId = d.DoctorId,
             Avatar = d.Avatar.ConvertToString(),

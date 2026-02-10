@@ -101,10 +101,10 @@ public class DoctorService : IDoctorService
             })
             .FirstAsync();
 
-        IEnumerable<BriefDto> others = await _context.Doctors
+        IEnumerable<OtherDto> others = await _context.Doctors
             .Where(d => d.DepartmentId == detail.DepartmentId && d.DoctorId != detail.DoctorId)
             .OrderBy(d => d.DoctorId)
-            .Select(d => new BriefDto
+            .Select(d => new OtherDto
             {
                 DoctorId = d.DoctorId,
                 Avatar = d.Avatar,

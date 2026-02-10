@@ -5,7 +5,7 @@ namespace eDoctor.Models.Dtos.Doctor;
 public class AboutDto
 {
     public DetailDto Detail { get; set; } = null!;
-    public IEnumerable<BriefDto> Others { get; set; } = null!;
+    public IEnumerable<OtherDto> Others { get; set; } = null!;
 }
 
 public class DetailDto
@@ -24,4 +24,11 @@ public class IntroductionDto
 {
     public string SectionTitle { get; set; } = null!;
     public string Content { get; set; } = null!;
+}
+
+public class OtherDto
+{
+    public int DoctorId { get; set; }
+    public byte[] Avatar { get; set; } = null!;
+    public string FullName { get; set; } = null!;
 }

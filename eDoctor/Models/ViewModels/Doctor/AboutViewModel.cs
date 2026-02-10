@@ -6,7 +6,7 @@ public class AboutViewModel
 {
     public int DoctorId { get; set; }
     public DetailViewModel Detail { get; set; } = null!;
-    public IEnumerable<BriefViewModel> Others { get; set; } = null!;
+    public IEnumerable<OtherViewModel> Others { get; set; } = null!;
 }
 
 public class DetailViewModel
@@ -24,4 +24,11 @@ public class IntroductionViewModel
 {
     public string SectionTitle { get; set; } = null!;
     public string Content { get; set; } = null!;
+}
+
+public class OtherViewModel
+{
+    public int DoctorId { get; set; }
+    public string Avatar { get; set; } = null!;
+    public string FullName { get; set; } = null!;
 }
