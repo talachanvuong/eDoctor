@@ -12,6 +12,27 @@ builder.Services
     .AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie();
 
+builder.Services.Configure<CookieAuthenticationOptions>(
+    CookieAuthenticationDefaults.AuthenticationScheme,
+    options =>
+    {
+        options.Events.OnRedirectToLogin = context =>
+        {
+            if (context.Request.Path.StartsWithSegments("/Doctor"))
+            {
+                context.Response.Redirect("/Doctor/Account/Login");
+            }
+            else
+            {
+                context.Response.Redirect("/Account/Login");
+            }
+
+            return Task.CompletedTask;
+        };
+
+        options.AccessDeniedPath = "/Error/Error";
+    });
+
 builder.Services.AddAuthorization();
 
 // MVC
@@ -56,6 +77,11 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapStaticAssets();
+
+app.MapControllerRoute(
+    name: "areas",
+    pattern: "{area:exists}/{controller=Home}/{action=Index}/{id?}")
+    .WithStaticAssets();
 
 app.MapControllerRoute(
     name: "default",

@@ -1,0 +1,45 @@
+﻿@{
+    bool useContainer = (bool?)ViewData["UseContainer"] ?? false;
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>eDoctor</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/lib/bootstrap-icons/font/bootstrap-icons.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+</head>
+<body>
+    <div class="d-none d-md-block">
+        @if (User.IsInRole(RoleTypes.Doctor))
+        {
+            @await Html.PartialAsync("_Nav")
+        }
+
+        @if (useContainer)
+        {
+            <div class="container my-5">
+                @RenderBody()
+            </div>
+        }
+        else
+        {
+            @RenderBody()
+        }
+
+        @await Html.PartialAsync("_Alert")
+    </div>
+
+    <div class="d-flex d-md-none vh-100 align-items-center justify-content-center text-center">
+        <div>
+            <h1>HEY</h1>
+            <p>We do not provide a mobile version!</p>
+        </div>
+    </div>
+
+    <script src="~/lib/bootstrap/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

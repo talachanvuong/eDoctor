@@ -1,0 +1,29 @@
+﻿@model LoginViewModel
+
+@{
+    ViewData["UseContainer"] = true;
+}
+
+<div class="card w-50 mx-auto">
+    <div class="card-body">
+        <h2 class="card-title text-center">LOGIN</h2>
+
+        <form method="post" asp-controller="Account" asp-action="Login">
+            <div class="alert alert-danger mb-3" asp-validation-summary="ModelOnly"></div>
+
+            <div class="mb-3">
+                <label class="form-label" asp-for="LoginName"></label>
+                <input class="form-control" type="text" asp-for="LoginName" />
+                <span class="text-danger" asp-validation-for="LoginName"></span>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label" asp-for="Password"></label>
+                <input class="form-control" type="password" asp-for="Password" />
+                <span class="text-danger" asp-validation-for="Password"></span>
+            </div>
+
+            <button class="btn btn-primary w-100" type="submit">SUBMIT</button>
+        </form>
+    </div>
+</div>

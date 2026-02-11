@@ -1,4 +1,6 @@
-﻿using eDoctor.Data;
+﻿using eDoctor.Areas.Doctor.Models.Dtos.Doctor.Queries;
+using eDoctor.Data;
+using eDoctor.Helpers;
 using eDoctor.Interfaces;
 using eDoctor.Models;
 using eDoctor.Models.Dtos.Doctor;
@@ -12,10 +14,14 @@ namespace eDoctor.Services;
 public class DoctorService : IDoctorService
 {
     private readonly ApplicationDbContext _context;
+    private readonly IPasswordService _passwordService;
+    private readonly IAuthService _authService;
 
-    public DoctorService(ApplicationDbContext context)
+    public DoctorService(ApplicationDbContext context, IPasswordService passwordService, IAuthService authService)
     {
         _context = context;
+        _passwordService = passwordService;
+        _authService = authService;
     }
 
     public async Task<Result<DoctorsDto, DoctorsFallbackDto>> GetByDepartmentAsync(DoctorsQueryDto dto)
@@ -119,5 +125,24 @@ public class DoctorService : IDoctorService
         };
 
         return Result<AboutDto, AboutFallbackDto>.Success(value);
+    }
+
+    public async Task<Result> LoginAsync(LoginQueryDto dto)
+    {
+        Doctor? doctor = await _context.Doctors.FirstOrDefaultAsync(u => u.LoginName == dto.LoginName);
+
+        if (doctor == null || !_passwordService.Verify(dto.Password, doctor.Password))
+        {
+            return Result.Failure("Invalid login name or password.");
+        }
+
+        await _authService.LoginAsync(doctor.DoctorId, RoleTypes.Doctor);
+
+        return Result.Success();
+    }
+
+    public async Task LogoutAsync()
+    {
+        await _authService.LogoutAsync();
     }
 }

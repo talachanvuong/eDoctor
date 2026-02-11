@@ -14,7 +14,11 @@ public class OnlyAnonymousAttribute : ActionFilterAttribute
 
         if (principal.IsInRole(RoleTypes.User))
         {
-            context.Result = new RedirectToActionResult("Index", "Home", null);
+            context.Result = new RedirectToActionResult("Index", "Home", new { Area = "" });
+        }
+        else if (principal.IsInRole(RoleTypes.Doctor))
+        {
+            context.Result = new RedirectToActionResult("Index", "Home", new { Area = "Doctor" });
         }
     }
 }
