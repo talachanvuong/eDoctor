@@ -8,7 +8,6 @@ using eDoctor.Models.ViewModels.User;
 using eDoctor.Results;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Globalization;
 
 namespace eDoctor.Controllers;
 
@@ -121,8 +120,8 @@ public class AccountController : Controller
         ProfileViewModel vm = new ProfileViewModel
         {
             FullName = user.FullName,
-            BirthDate = user.BirthDate.ToString("d", CultureInfo.GetCultureInfo("en-US")),
-            Sex = user.Sex ? "Female" : "Male"
+            BirthDate = user.BirthDate,
+            Sex = user.Sex
         };
 
         return View(vm);
@@ -140,7 +139,9 @@ public class AccountController : Controller
         UpdateQueryDto dto = new UpdateQueryDto
         {
             UserId = User.GetId(),
-            FullName = vm.FullName
+            FullName = vm.FullName,
+            BirthDate = vm.BirthDate,
+            Sex = vm.Sex
         };
 
         await _userService.UpdateAsync(dto);

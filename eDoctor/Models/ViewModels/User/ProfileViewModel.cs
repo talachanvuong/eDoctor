@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using eDoctor.Attributes;
+using System.ComponentModel.DataAnnotations;
 
 namespace eDoctor.Models.ViewModels.User;
 
@@ -10,8 +11,11 @@ public class ProfileViewModel
     public string FullName { get; set; } = null!;
 
     [Display(Name = "Date of birth")]
-    public string BirthDate { get; set; } = null!;
+    [Required]
+    [Age(18, 120)]
+    public DateTime BirthDate { get; set; }
 
     [Display(Name = "Sex")]
-    public string Sex { get; set; } = null!;
+    [Required]
+    public bool Sex { get; set; }
 }

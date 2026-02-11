@@ -17,14 +17,23 @@
                 <span class="text-danger" asp-validation-for="FullName"></span>
             </div>
 
-            <div class="input-group mb-3">
-                <label class="input-group-text" asp-for="BirthDate"></label>
-                <input class="form-control" type="text" asp-for="BirthDate" readonly />
+            <div class="mb-3">
+                <div class="input-group">
+                    <label class="input-group-text" asp-for="BirthDate"></label>
+                    <input class="form-control" type="date" asp-for="BirthDate" />
+                </div>
+                <span class="text-danger" asp-validation-for="BirthDate"></span>
             </div>
 
-            <div class="input-group mb-3">
-                <label class="input-group-text" asp-for="Sex"></label>
-                <input class="form-control" type="text" asp-for="Sex" readonly />
+            <div class="mb-3">
+                <div class="input-group">
+                    <label class="input-group-text" asp-for="Sex"></label>   
+                    <select class="form-select" asp-for="Sex">
+                        <option value="false">Male</option>
+                        <option value="true">Female</option>
+                    </select>
+                </div>
+                <span class="text-danger" asp-validation-for="Sex"></span>
             </div>
 
             <button class="btn btn-primary w-50 mx-auto d-block" type="submit">EDIT PROFILE</button>

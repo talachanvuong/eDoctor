@@ -62,6 +62,8 @@ public class UserService : IUserService
         User user = await _context.Users.FirstAsync(u => u.UserId == dto.UserId);
 
         user.FullName = dto.FullName;
+        user.BirthDate = dto.BirthDate;
+        user.Sex = dto.Sex;
 
         await _context.SaveChangesAsync();
     }
