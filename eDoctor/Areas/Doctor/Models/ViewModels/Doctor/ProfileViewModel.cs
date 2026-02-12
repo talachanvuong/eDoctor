@@ -21,8 +21,6 @@ public class InfoViewModel
     [Age(18, 120)]
     public DateTime BirthDate { get; set; }
 
-    [Display(Name = "Gender")]
-    [Required]
     public bool Gender { get; set; }
 
     [Display(Name = "Experience")]

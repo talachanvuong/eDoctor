@@ -15,8 +15,6 @@ public class RegisterViewModel
     [Age(18, 120)]
     public DateTime BirthDate { get; set; }
 
-    [Display(Name = "Sex")]
-    [Required]
     public bool Sex { get; set; }
 
     [Display(Name = "Login name")]
@@ -25,7 +23,6 @@ public class RegisterViewModel
     [StringLength(64, MinimumLength = 4)]
     public string LoginName { get; set; } = null!;
 
-    [Display(Name = "Password")]
     [Required]
     [Password]
     [StringLength(32, MinimumLength = 8)]

@@ -15,7 +15,5 @@ public class ProfileViewModel
     [Age(18, 120)]
     public DateTime BirthDate { get; set; }
 
-    [Display(Name = "Sex")]
-    [Required]
     public bool Sex { get; set; }
 }
