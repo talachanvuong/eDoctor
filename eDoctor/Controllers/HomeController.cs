@@ -83,7 +83,6 @@ public class HomeController : Controller
 
         vm.Detail = new DetailViewModel
         {
-            DoctorId = detail.DoctorId,
             FullName = detail.FullName,
             RankCode = detail.RankCode,
             YearsOfExperience = detail.YearsOfExperience,

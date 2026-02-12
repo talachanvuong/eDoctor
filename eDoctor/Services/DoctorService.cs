@@ -89,7 +89,6 @@ public class DoctorService : IDoctorService
             .Where(d => d.DoctorId == dto.DoctorId)
             .Select(d => new DetailDto
             {
-                DoctorId = d.DoctorId,
                 FullName = d.FullName,
                 RankCode = d.RankCode,
                 YearsOfExperience = d.YearsOfExperience,
@@ -108,7 +107,7 @@ public class DoctorService : IDoctorService
             .FirstAsync();
 
         IEnumerable<OtherDto> others = await _context.Doctors
-            .Where(d => d.DepartmentId == detail.DepartmentId && d.DoctorId != detail.DoctorId)
+            .Where(d => d.DepartmentId == detail.DepartmentId && d.DoctorId != dto.DoctorId)
             .OrderBy(d => d.DoctorId)
             .Select(d => new OtherDto
             {

@@ -10,7 +10,6 @@ public class AboutDto
 
 public class DetailDto
 {
-    public int DoctorId { get; set; }
     public string FullName { get; set; } = null!;
     public RankCode RankCode { get; set; }
     public int YearsOfExperience { get; set; }
