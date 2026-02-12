@@ -1,4 +1,5 @@
-﻿using eDoctor.Areas.Doctor.Models.Dtos.Doctor.Queries;
+﻿using eDoctor.Areas.Doctor.Models.Dtos.Doctor;
+using eDoctor.Areas.Doctor.Models.Dtos.Doctor.Queries;
 using eDoctor.Models.Dtos.Doctor;
 using eDoctor.Models.Dtos.Doctor.Fallbacks;
 using eDoctor.Models.Dtos.Doctor.Queries;
@@ -12,4 +13,5 @@ public interface IDoctorService
     Task<Result<AboutDto, AboutFallbackDto>> GetAboutAsync(AboutQueryDto dto);
     Task<Result> LoginAsync(LoginQueryDto dto);
     Task LogoutAsync();
+    Task<ProfileDto> GetProfileAsync(ProfileQueryDto dto);
 }

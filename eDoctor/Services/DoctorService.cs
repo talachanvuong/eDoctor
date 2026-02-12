@@ -1,4 +1,5 @@
-﻿using eDoctor.Areas.Doctor.Models.Dtos.Doctor.Queries;
+﻿using eDoctor.Areas.Doctor.Models.Dtos.Doctor;
+using eDoctor.Areas.Doctor.Models.Dtos.Doctor.Queries;
 using eDoctor.Data;
 using eDoctor.Helpers;
 using eDoctor.Interfaces;
@@ -8,6 +9,8 @@ using eDoctor.Models.Dtos.Doctor.Fallbacks;
 using eDoctor.Models.Dtos.Doctor.Queries;
 using eDoctor.Results;
 using Microsoft.EntityFrameworkCore;
+using AreaIntroductionDto = eDoctor.Areas.Doctor.Models.Dtos.Doctor.IntroductionDto;
+using IntroductionDto = eDoctor.Models.Dtos.Doctor.IntroductionDto;
 
 namespace eDoctor.Services;
 
@@ -143,5 +146,39 @@ public class DoctorService : IDoctorService
     public async Task LogoutAsync()
     {
         await _authService.LogoutAsync();
+    }
+
+    public async Task<ProfileDto> GetProfileAsync(ProfileQueryDto dto)
+    {
+        InfoDto info = await _context.Doctors
+            .Where(d => d.DoctorId == dto.DoctorId)
+            .Select(d => new InfoDto
+            {
+                FullName = d.FullName,
+                BirthDate = d.BirthDate,
+                Gender = d.Gender,
+                YearsOfExperience = d.YearsOfExperience,
+                Avatar = d.Avatar
+            })
+            .FirstAsync();
+
+        IEnumerable<AreaIntroductionDto> introductions = await _context.Sections
+            .OrderBy(s => s.SectionOrder)
+            .Select(s => new AreaIntroductionDto
+            {
+                SectionId = s.SectionId,
+                SectionTitle = s.SectionTitle,
+                Content = s.Introductions
+                    .Where(i => i.DoctorId == dto.DoctorId)
+                    .Select(i => i.Content)
+                    .FirstOrDefault()
+            })
+            .ToListAsync();
+
+        return new ProfileDto
+        {
+            Info = info,
+            Introductions = introductions
+        };
     }
 }
