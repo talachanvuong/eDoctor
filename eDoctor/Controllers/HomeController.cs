@@ -84,7 +84,7 @@ public class HomeController : Controller
         vm.Detail = new DetailViewModel
         {
             FullName = detail.FullName,
-            RankCode = detail.RankCode,
+            RankCode = detail.RankCode.ConvertToString(),
             YearsOfExperience = detail.YearsOfExperience,
             Avatar = detail.Avatar.ConvertToString(),
             DepartmentName = detail.DepartmentName,

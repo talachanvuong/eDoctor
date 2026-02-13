@@ -87,7 +87,7 @@ public class AccountController : Controller
                 FullName = info.FullName,
                 BirthDate = info.BirthDate,
                 Gender = info.Gender,
-                RankCode = info.RankCode,
+                RankCode = info.RankCode.ConvertToString(),
                 YearsOfExperience = info.YearsOfExperience,
                 Avatar = info.Avatar.ConvertToString(),
                 DepartmentName = info.DepartmentName

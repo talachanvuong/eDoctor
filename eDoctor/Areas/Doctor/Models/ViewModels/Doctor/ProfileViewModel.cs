@@ -25,7 +25,7 @@ public class InfoViewModel
     public bool Gender { get; set; }
 
     [Display(Name = "Academic rank")]
-    public RankCode RankCode { get; set; }
+    public string RankCode { get; set; } = null!;
 
     [Display(Name = "Experience")]
     [Required]

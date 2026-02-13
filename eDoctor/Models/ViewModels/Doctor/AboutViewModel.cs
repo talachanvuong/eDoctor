@@ -12,7 +12,7 @@ public class AboutViewModel
 public class DetailViewModel
 {
     public string FullName { get; set; } = null!;
-    public RankCode RankCode { get; set; }
+    public string RankCode { get; set; } = null!;
     public int YearsOfExperience { get; set; }
     public string Avatar { get; set; } = null!;
     public string DepartmentName { get; set; } = null!;
