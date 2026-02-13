@@ -87,8 +87,10 @@ public class AccountController : Controller
                 FullName = info.FullName,
                 BirthDate = info.BirthDate,
                 Gender = info.Gender,
+                RankCode = info.RankCode,
                 YearsOfExperience = info.YearsOfExperience,
-                Avatar = info.Avatar.ConvertToString()
+                Avatar = info.Avatar.ConvertToString(),
+                DepartmentName = info.DepartmentName
             },
             Introductions = doctor.Introductions.Select(i => new IntroductionViewModel
             {

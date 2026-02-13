@@ -1,4 +1,5 @@
 ﻿using eDoctor.Attributes;
+using eDoctor.Enums;
 using System.ComponentModel.DataAnnotations;
 
 namespace eDoctor.Areas.Doctor.Models.ViewModels.Doctor;
@@ -23,6 +24,9 @@ public class InfoViewModel
 
     public bool Gender { get; set; }
 
+    [Display(Name = "Academic rank")]
+    public RankCode RankCode { get; set; }
+
     [Display(Name = "Experience")]
     [Required]
     [Range(0, 60)]
@@ -33,6 +37,9 @@ public class InfoViewModel
     [Display(Name = "Avatar")]
     [Image(2 * 1024 * 1024, [".png"])]
     public IFormFile? AvatarFile { get; set; }
+
+    [Display(Name = "Department")]
+    public string DepartmentName { get; set; } = null!;
 }
 
 public class IntroductionViewModel

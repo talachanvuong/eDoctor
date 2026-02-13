@@ -159,8 +159,10 @@ public class DoctorService : IDoctorService
                 FullName = d.FullName,
                 BirthDate = d.BirthDate,
                 Gender = d.Gender,
+                RankCode = d.RankCode,
                 YearsOfExperience = d.YearsOfExperience,
-                Avatar = d.Avatar
+                Avatar = d.Avatar,
+                DepartmentName = d.Department.DepartmentName
             })
             .FirstAsync();
 

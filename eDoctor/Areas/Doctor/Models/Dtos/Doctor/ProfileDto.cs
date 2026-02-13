@@ -1,4 +1,6 @@
-﻿namespace eDoctor.Areas.Doctor.Models.Dtos.Doctor;
+﻿using eDoctor.Enums;
+
+namespace eDoctor.Areas.Doctor.Models.Dtos.Doctor;
 
 public class ProfileDto
 {
@@ -11,8 +13,10 @@ public class InfoDto
     public string FullName { get; set; } = null!;
     public DateTime BirthDate { get; set; }
     public bool Gender { get; set; }
+    public RankCode RankCode { get; set; }
     public int YearsOfExperience { get; set; }
     public byte[] Avatar { get; set; } = null!;
+    public string DepartmentName { get; set; } = null!;
 }
 
 public class IntroductionDto

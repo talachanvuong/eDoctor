@@ -43,10 +43,20 @@
                     <span class="text-danger" asp-validation-for="Info.Gender"></span>
                 </div>
 
-                <div>
+                <div class="mb-3">
+                    <label class="form-label" asp-for="Info.RankCode"></label>
+                    <input class="form-control" type="text" asp-for="Info.RankCode" readonly />
+                </div>
+
+                <div class="mb-3">
                     <label class="form-label" asp-for="Info.YearsOfExperience"></label>
                     <input class="form-control" type="number" asp-for="Info.YearsOfExperience" />
                     <span class="text-danger" asp-validation-for="Info.YearsOfExperience"></span>
+                </div>
+
+                <div>
+                    <label class="form-label" asp-for="Info.DepartmentName"></label>
+                    <input class="form-control" type="text" asp-for="Info.DepartmentName" readonly />
                 </div>
             </div>
         </div>
