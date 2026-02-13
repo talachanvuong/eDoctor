@@ -31,6 +31,11 @@ public class ImageAttribute : ValidationAttribute
             return new ValidationResult($"File size must not exceed {_maxSize / (1024 * 1024)} MB.");
         }
 
+        if (selectedValue.Length == 0)
+        {
+            return new ValidationResult("File cannot be empty.");
+        }
+
         string extension = Path.GetExtension(selectedValue.FileName).ToLower();
 
         if (!_extensions.Contains(extension))

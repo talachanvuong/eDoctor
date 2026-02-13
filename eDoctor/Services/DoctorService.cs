@@ -19,12 +19,14 @@ public class DoctorService : IDoctorService
     private readonly ApplicationDbContext _context;
     private readonly IPasswordService _passwordService;
     private readonly IAuthService _authService;
+    private readonly IImageService _imageService;
 
-    public DoctorService(ApplicationDbContext context, IPasswordService passwordService, IAuthService authService)
+    public DoctorService(ApplicationDbContext context, IPasswordService passwordService, IAuthService authService, IImageService imageService)
     {
         _context = context;
         _passwordService = passwordService;
         _authService = authService;
+        _imageService = imageService;
     }
 
     public async Task<Result<DoctorsDto, DoctorsFallbackDto>> GetByDepartmentAsync(DoctorsQueryDto dto)
@@ -180,5 +182,50 @@ public class DoctorService : IDoctorService
             Info = info,
             Introductions = introductions
         };
+    }
+
+    public async Task UpdateAsync(UpdateQueryDto dto)
+    {
+        Doctor doctor = await _context.Doctors
+            .Include(d => d.Introductions)
+            .FirstAsync(d => d.DoctorId == dto.DoctorId);
+
+        doctor.FullName = dto.FullName;
+        doctor.BirthDate = dto.BirthDate;
+        doctor.Gender = dto.Gender;
+        doctor.YearsOfExperience = dto.YearsOfExperience;
+
+        if (dto.Avatar != null)
+        {
+            doctor.Avatar = await _imageService.ResizeAsync(dto.Avatar);
+        }
+
+        var existingIntroductions = doctor.Introductions.OrderBy(i => i.SectionId).ToList();
+        var introductions = dto.Introductions.OrderBy(i => i.SectionId).ToList();
+
+        for (int i = 0; i < 3; i++)
+        {
+            existingIntroductions[i].Content = introductions[i].Content;
+        }
+
+        if (existingIntroductions.Count == 3 && introductions.Count == 4)
+        {
+            await _context.Introductions.AddAsync(new Introduction
+            {
+                DoctorId = dto.DoctorId,
+                SectionId = introductions[3].SectionId,
+                Content = introductions[3].Content
+            });
+        }
+        else if (existingIntroductions.Count == 4 && introductions.Count == 4)
+        {
+            existingIntroductions[3].Content = introductions[3].Content;
+        }
+        else if (existingIntroductions.Count == 4 && introductions.Count == 3)
+        {
+            _context.Introductions.Remove(existingIntroductions[3]);
+        }
+
+        await _context.SaveChangesAsync();
     }
 }

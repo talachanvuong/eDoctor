@@ -110,6 +110,51 @@ public class AccountController : Controller
             return View(vm);
         }
 
-        return View(vm);
+        // Handle avatar file
+        IFormFile? file = vm.Info.AvatarFile;
+        byte[]? avatar = null;
+
+        if (file != null)
+        {
+            using MemoryStream ms = new MemoryStream();
+            await file.CopyToAsync(ms);
+            avatar = ms.ToArray();
+        }
+
+        // Handle introductions
+        foreach (var introduction in vm.Introductions[..^1])
+        {
+            if (introduction.Content == null)
+            {
+                ModelState.AddModelError("", $"{introduction.SectionTitle} is required.");
+
+                return View(vm);
+            }
+        }
+
+        var introductions = vm.Introductions[^1].Content == null
+            ? vm.Introductions[..^1]
+            : vm.Introductions;
+
+        UpdateQueryDto dto = new UpdateQueryDto
+        {
+            DoctorId = User.GetId(),
+            FullName = vm.Info.FullName,
+            BirthDate = vm.Info.BirthDate,
+            Gender = vm.Info.Gender,
+            YearsOfExperience = vm.Info.YearsOfExperience,
+            Avatar = avatar,
+            Introductions = introductions.Select(i => new IntroductionQueryDto
+            {
+                SectionId = i.SectionId,
+                Content = i.Content!
+            })
+        };
+
+        await _doctorService.UpdateAsync(dto);
+
+        TempData.SetAlert("Update successfully!", AlertTypes.Success);
+
+        return RedirectToAction("Profile", "Account");
     }
 }

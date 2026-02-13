@@ -14,4 +14,5 @@ public interface IDoctorService
     Task<Result> LoginAsync(LoginQueryDto dto);
     Task LogoutAsync();
     Task<ProfileDto> GetProfileAsync(ProfileQueryDto dto);
+    Task UpdateAsync(UpdateQueryDto dto);
 }
