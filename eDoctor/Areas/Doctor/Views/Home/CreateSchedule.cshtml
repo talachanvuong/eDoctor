@@ -1,0 +1,23 @@
+﻿@model CreateViewModel
+
+@{
+    ViewData["UseContainer"] = true;
+}
+
+<div class="card w-50 mx-auto">
+    <div class="card-body">
+        <h2 class="card-title text-center">CREATE NEW APPOINTMENT</h2>
+
+        <form method="post" asp-controller="Home" asp-action="CreateSchedule">
+            <div class="alert alert-danger mb-3" asp-validation-summary="ModelOnly"></div>
+
+            <div class="mb-3">
+                <label class="form-label" asp-for="StartTime"></label>
+                <input class="form-control" type="datetime-local" asp-for="StartTime" />
+                <span class="text-danger" asp-validation-for="StartTime"></span>
+            </div>
+
+            <button class="btn btn-primary w-100" type="submit">ADD</button>
+        </form>
+    </div>
+</div>
