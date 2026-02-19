@@ -32,4 +32,6 @@ public class Doctor
     public ICollection<Introduction> Introductions { get; } = [];
 
     public Department Department { get; set; } = null!;
+
+    public ICollection<Schedule> Schedules { get; } = [];
 }

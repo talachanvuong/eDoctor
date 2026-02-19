@@ -19,4 +19,6 @@ public class User
     public DateTime BirthDate { get; set; }
 
     public bool Sex { get; set; }
+
+    public ICollection<Schedule> Schedules { get; } = [];
 }
