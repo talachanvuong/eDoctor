@@ -2,8 +2,8 @@
 
 public enum RankCode
 {
-    Doctor,
-    MasterOfScience,
-    DoctorOfPhilosophy,
-    Professor
+    DOCTOR,
+    MASTER_OF_SCIENCE,
+    DOCTOR_OF_PHILOSOPHY,
+    PROFESSOR
 }

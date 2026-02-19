@@ -8,10 +8,10 @@ public static class RankCodeHelper
     {
         return rankCode switch
         {
-            RankCode.Doctor => "Dr.",
-            RankCode.MasterOfScience => "MS",
-            RankCode.DoctorOfPhilosophy => "PhD",
-            RankCode.Professor => "Prof.",
+            RankCode.DOCTOR => "Dr.",
+            RankCode.MASTER_OF_SCIENCE => "MS",
+            RankCode.DOCTOR_OF_PHILOSOPHY => "PhD",
+            RankCode.PROFESSOR => "Prof.",
             _ => "None"
         };
     }
