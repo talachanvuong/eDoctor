@@ -108,4 +108,28 @@ public class HomeController : Controller
 
         return View(vm);
     }
+
+    [HttpPost]
+    [Authorize(Roles = RoleTypes.Doctor)]
+    public async Task<IActionResult> CancelSchedule(CancelViewModel vm)
+    {
+        CancelQueryDto dto = new CancelQueryDto
+        {
+            ScheduleId = vm.ScheduleId,
+            DoctorId = User.GetId()
+        };
+
+        Result result = await _scheduleService.CancelAsync(dto);
+
+        if (!result.IsSuccess)
+        {
+            TempData.SetAlert(result.Error!, AlertTypes.Danger);
+
+            return RedirectToAction("Index", "Home");
+        }
+
+        TempData.SetAlert("Cancel successfully!", AlertTypes.Success);
+
+        return RedirectToAction("DetailSchedule", "Home", new { vm.ScheduleId });
+    }
 }

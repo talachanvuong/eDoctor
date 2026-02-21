@@ -98,4 +98,18 @@ public class ScheduleService : IScheduleService
 
         return Result<DetailDto>.Success(value);
     }
+
+    public async Task<Result> CancelAsync(CancelQueryDto dto)
+    {
+        var affected = await _context.Schedules
+            .Where(s => s.ScheduleId == dto.ScheduleId && s.DoctorId == dto.DoctorId && s.Status == ScheduleStatus.CREATED)
+            .ExecuteUpdateAsync(s => s.SetProperty(x => x.Status, ScheduleStatus.CANCELLED));
+
+        if (affected == 0)
+        {
+            return Result.Failure("Cancel schedule failed.");
+        }
+
+        return Result.Success();
+    }
 }
