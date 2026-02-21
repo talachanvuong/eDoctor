@@ -20,14 +20,14 @@ public class ScheduleService : IScheduleService
 
     public async Task<Result> AddAsync(CreateQueryDto dto)
     {
-        DateTime bufferedStart = dto.StartTime.AddMinutes(-5);
-        DateTime bufferedEnd = dto.EndTime.AddMinutes(5);
+        DateTime bufferedStart = dto.StartTime.AddMinutes(-15);
+        DateTime bufferedEnd = dto.EndTime.AddMinutes(15);
 
         if (await _context.Schedules
                 .Where(s => s.DoctorId == dto.DoctorId)
                 .AnyAsync(s => s.StartTime < bufferedEnd && s.EndTime > bufferedStart))
         {
-            return Result.Failure("Schedule overlaps. Please keep at least a 5-minute gap.");
+            return Result.Failure("Schedule overlaps. Please keep at least a 15-minute gap.");
         }
 
         Schedule schedule = new Schedule
