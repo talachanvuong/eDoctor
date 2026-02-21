@@ -1,0 +1,52 @@
+﻿@model SchedulesViewModel
+
+@{
+    ViewData["UseContainer"] = true;
+}
+
+<form class="d-flex gap-2" method="get" asp-controller="Home" asp-action="Schedules">
+    <input type="hidden" asp-for="DoctorId" />
+    <input class="form-control w-auto" type="date" onchange="this.form.submit()" asp-for="Date" />
+</form>
+
+<div class="card border-0 shadow-sm rounded-4 mt-3">
+    <div class="card-header bg-white border-bottom px-4 py-3 rounded-top-4 d-flex align-items-center justify-content-between">
+        <h6 class="mb-0 fw-bold text-dark">
+            <i class="bi bi-calendar3 me-2 text-primary"></i>Available Schedules
+        </h6>
+        <span class="badge bg-primary-subtle text-primary rounded-pill">
+            @Model.Schedules.Count() available
+        </span>
+    </div>
+
+    <div class="card-body p-0">
+        @if (Model.Schedules.Any())
+        {
+            <ul class="list-group list-group-flush">
+                @foreach (var item in Model.Schedules)
+                {
+                    <li class="list-group-item px-4 py-3 d-flex align-items-center justify-content-between">
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="bg-primary-subtle rounded-3 p-2 d-flex align-items-center justify-content-center" style="width: 36px; height: 36px; flex-shrink: 0;">
+                                <i class="bi bi-clock text-primary"></i>
+                            </div>
+                            <span class="fw-semibold">@item.Time</span>
+                        </div>
+
+                        <a class="btn btn-sm btn-primary rounded-pill px-3" asp-controller="Home" asp-action="BookSchedule" asp-route-ScheduleId="@item.ScheduleId">
+                            <i class="bi bi-calendar-check me-1"></i>Book
+                        </a>
+                    </li>
+                }
+            </ul>
+        }
+        else
+        {
+            <div class="text-center py-5 text-muted">
+                <i class="bi bi-calendar-x fs-1 d-block mb-3 opacity-50"></i>
+                <p class="fw-semibold mb-1">No schedules available</p>
+                <small>Please try another date.</small>
+            </div>
+        }
+    </div>
+</div>

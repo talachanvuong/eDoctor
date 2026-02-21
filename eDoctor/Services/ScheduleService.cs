@@ -6,6 +6,12 @@ using eDoctor.Interfaces;
 using eDoctor.Models;
 using eDoctor.Results;
 using Microsoft.EntityFrameworkCore;
+using AreaScheduleDto = eDoctor.Areas.Doctor.Models.Dtos.Schedule.ScheduleDto;
+using AreaSchedulesDto = eDoctor.Areas.Doctor.Models.Dtos.Schedule.SchedulesDto;
+using AreaSchedulesQueryDto = eDoctor.Areas.Doctor.Models.Dtos.Schedule.Queries.SchedulesQueryDto;
+using ScheduleDto = eDoctor.Models.Dtos.Doctor.ScheduleDto;
+using SchedulesDto = eDoctor.Models.Dtos.Doctor.SchedulesDto;
+using SchedulesQueryDto = eDoctor.Models.Dtos.Doctor.Queries.SchedulesQueryDto;
 
 namespace eDoctor.Services;
 
@@ -44,7 +50,7 @@ public class ScheduleService : IScheduleService
         return Result.Success();
     }
 
-    public async Task<SchedulesDto> GetSchedulesAsync(SchedulesQueryDto dto)
+    public async Task<AreaSchedulesDto> GetSchedulesAsync(AreaSchedulesQueryDto dto)
     {
         var query = _context.Schedules.AsQueryable();
 
@@ -61,8 +67,8 @@ public class ScheduleService : IScheduleService
             query = query.Where(s => s.Status == dto.Status);
         }
 
-        IEnumerable<ScheduleDto> schedules = await query.OrderByDescending(s => s.StartTime)
-            .Select(s => new ScheduleDto
+        IEnumerable<AreaScheduleDto> schedules = await query.OrderByDescending(s => s.StartTime)
+            .Select(s => new AreaScheduleDto
             {
                 ScheduleId = s.ScheduleId,
                 StartTime = s.StartTime,
@@ -71,7 +77,7 @@ public class ScheduleService : IScheduleService
             })
             .ToListAsync();
 
-        return new SchedulesDto
+        return new AreaSchedulesDto
         {
             Schedules = schedules
         };
@@ -111,5 +117,47 @@ public class ScheduleService : IScheduleService
         }
 
         return Result.Success();
+    }
+
+    public async Task<Result<SchedulesDto>> GetSchedulesAsync(SchedulesQueryDto dto)
+    {
+        if (!await _context.Doctors.AnyAsync(d => d.DoctorId == dto.DoctorId))
+        {
+            return Result<SchedulesDto>.Failure("Doctor not found.");
+        }
+
+        var query = _context.Schedules.AsQueryable();
+
+        if (dto.Date != null)
+        {
+            var startOfDay = dto.Date.Value.Date;
+            var endOfDay = startOfDay.AddDays(1);
+
+            query = query.Where(s => s.StartTime < endOfDay && s.EndTime > startOfDay);
+        }
+
+        var cutoff = DateTime.Now + TimeSpan.FromMinutes(15);
+
+        var patientSchedules = _context.Schedules
+            .Where(s => s.UserId == dto.UserId && (s.Status == ScheduleStatus.ORDERED || s.Status == ScheduleStatus.ONGOING));
+
+        IEnumerable<ScheduleDto> availables = await query
+            .Where(s => s.DoctorId == dto.DoctorId && s.Status == ScheduleStatus.CREATED && s.StartTime > cutoff && !patientSchedules
+                .Any(p => p.StartTime < s.EndTime && p.EndTime > s.StartTime))
+            .OrderByDescending(s => s.StartTime)
+            .Select(s => new ScheduleDto
+            {
+                ScheduleId = s.ScheduleId,
+                StartTime = s.StartTime,
+                EndTime = s.EndTime
+            })
+            .ToListAsync();
+
+        SchedulesDto value = new SchedulesDto
+        {
+            Schedules = availables
+        };
+
+        return Result<SchedulesDto>.Success(value);
     }
 }

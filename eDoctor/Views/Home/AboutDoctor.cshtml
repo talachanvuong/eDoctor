@@ -33,7 +33,8 @@
                     </tbody>
                 </table>
 
-                <form method="post">
+                <form method="get" asp-controller="Home" asp-action="Schedules">
+                    <input type="hidden" asp-for="DoctorId" />
                     <button class="btn btn-primary w-100" type="submit">BOOK AN APPOINTMENT</button>
                 </form>
             </div>

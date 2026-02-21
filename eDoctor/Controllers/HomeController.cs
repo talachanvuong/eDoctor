@@ -1,3 +1,4 @@
+using eDoctor.Helpers;
 using eDoctor.Helpers.ExtensionMethods;
 using eDoctor.Interfaces;
 using eDoctor.Models.Dtos.Doctor;
@@ -5,6 +6,7 @@ using eDoctor.Models.Dtos.Doctor.Fallbacks;
 using eDoctor.Models.Dtos.Doctor.Queries;
 using eDoctor.Models.ViewModels.Doctor;
 using eDoctor.Results;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace eDoctor.Controllers;
@@ -12,10 +14,12 @@ namespace eDoctor.Controllers;
 public class HomeController : Controller
 {
     private readonly IDoctorService _doctorService;
+    private readonly IScheduleService _scheduleService;
 
-    public HomeController(IDoctorService doctorService)
+    public HomeController(IDoctorService doctorService, IScheduleService scheduleService)
     {
         _doctorService = doctorService;
+        _scheduleService = scheduleService;
     }
 
     [HttpGet]
@@ -100,6 +104,37 @@ public class HomeController : Controller
             DoctorId = d.DoctorId,
             Avatar = d.Avatar.ConvertToString(),
             FullName = d.FullName
+        });
+
+        return View(vm);
+    }
+
+    [HttpGet]
+    [Authorize(Roles = RoleTypes.User)]
+    public async Task<IActionResult> Schedules(SchedulesViewModel vm)
+    {
+        SchedulesQueryDto dto = new SchedulesQueryDto
+        {
+            DoctorId = vm.DoctorId,
+            Date = vm.Date,
+            UserId = User.GetId()
+        };
+
+        Result<SchedulesDto> result = await _scheduleService.GetSchedulesAsync(dto);
+
+        if (!result.IsSuccess)
+        {
+            TempData.SetAlert(result.Error!, AlertTypes.Danger);
+
+            return RedirectToAction("Doctors", "Home");
+        }
+
+        SchedulesDto schedules = result.Value!;
+
+        vm.Schedules = schedules.Schedules.Select(s => new ScheduleViewModel
+        {
+            ScheduleId = s.ScheduleId,
+            Time = DateTimeHelper.ConvertToString(s.StartTime, s.EndTime),
         });
 
         return View(vm);
