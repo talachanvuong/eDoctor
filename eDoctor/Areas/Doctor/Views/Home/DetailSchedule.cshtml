@@ -1,0 +1,81 @@
+﻿@using eDoctor.Enums
+
+@model DetailViewModel
+
+@{
+    ViewData["UseContainer"] = true;
+}
+
+<div class="d-flex align-items-center gap-2 mb-3">
+    <a class="btn btn-sm btn-light border rounded-pill" asp-controller="Home" asp-action="Index">
+        <i class="bi bi-arrow-left me-1"></i>Back
+    </a>
+    <h6 class="mb-0 fw-bold">Schedule Detail</h6>
+</div>
+
+<div class="card border-0 shadow-sm rounded-4">
+    <div class="card-header bg-white border-bottom px-4 py-3 rounded-top-4 d-flex align-items-center justify-content-between">
+        <h6 class="mb-0 fw-bold text-dark">
+            <i class="bi bi-calendar3 me-2 text-primary"></i>#@Model.ScheduleId
+        </h6>
+        <span class="badge rounded-pill px-3 py-2 fw-semibold bg-secondary-subtle text-secondary">
+            @Model.Status
+        </span>
+    </div>
+
+    <div class="card-body px-4 py-3">
+        <ul class="list-group list-group-flush">
+            <li class="list-group-item px-0 py-3 d-flex align-items-center gap-3">
+                <div class="bg-primary-subtle rounded-3 p-2 d-flex align-items-center justify-content-center" style="width: 36px; height: 36px; flex-shrink: 0;">
+                    <i class="bi bi-clock text-primary"></i>
+                </div>
+                <div>
+                    <div class="text-muted small">Time</div>
+                    <div class="fw-semibold">@Model.Time</div>
+                </div>
+            </li>
+
+            <li class="list-group-item px-0 py-3 d-flex align-items-center gap-3">
+                <div class="bg-primary-subtle rounded-3 p-2 d-flex align-items-center justify-content-center" style="width: 36px; height: 36px; flex-shrink: 0;">
+                    <i class="bi bi-door-open text-primary"></i>
+                </div>
+                <div>
+                    <div class="text-muted small">Room</div>
+                    <div class="fw-semibold">@(Model.Room == null ? "Not assigned" : Model.Room)</div>
+                </div>
+            </li>
+
+            <li class="list-group-item px-0 py-3 d-flex align-items-center gap-3">
+                <div class="bg-primary-subtle rounded-3 p-2 d-flex align-items-center justify-content-center" style="width: 36px; height: 36px; flex-shrink: 0;">
+                    <i class="bi bi-person text-primary"></i>
+                </div>
+                <div>
+                    <div class="text-muted small">Patient</div>
+
+                    @if (Model.Patient == null)
+                    {
+                        <div class="fw-semibold">No patient yet</div>
+                    }
+                    else
+                    {
+                        <a class="fw-semibold text-decoration-none" asp-controller="Home" asp-action="PatientHistory" asp-route-UserId="@Model.UserId">
+                            @Model.Patient <i class="bi bi-chevron-right small"></i>
+                        </a>
+                    }
+                </div>
+            </li>
+        </ul>
+    </div>
+
+    @if (Model.Status == ScheduleStatus.CREATED.ConvertToString())
+    {
+        <div class="card-footer bg-white border-top px-4 py-3 rounded-bottom-4">
+            <form class="d-flex justify-content-end" method="post" asp-controller="Home" asp-action="CancelSchedule">
+                <input type="hidden" asp-for="ScheduleId" />
+                <button class="btn btn-danger rounded-pill" type="submit">
+                    <i class="bi bi-x-circle me-1"></i>Cancel Schedule
+                </button>
+            </form>
+        </div>
+    }
+</div>

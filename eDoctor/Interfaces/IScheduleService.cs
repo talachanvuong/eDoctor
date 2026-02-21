@@ -8,4 +8,5 @@ public interface IScheduleService
 {
     Task<Result> AddAsync(CreateQueryDto dto);
     Task<SchedulesDto> GetSchedulesAsync(SchedulesQueryDto dto);
+    Task<Result<DetailDto>> GetDetailAsync(DetailQueryDto dto);
 }

@@ -76,4 +76,26 @@ public class ScheduleService : IScheduleService
             Schedules = schedules
         };
     }
+
+    public async Task<Result<DetailDto>> GetDetailAsync(DetailQueryDto dto)
+    {
+        if (!await _context.Schedules.AnyAsync(s => s.ScheduleId == dto.ScheduleId && s.DoctorId == dto.DoctorId))
+        {
+            return Result<DetailDto>.Failure("Schedule not found.");
+        }
+
+        DetailDto value = await _context.Schedules
+            .Where(s => s.ScheduleId == dto.ScheduleId && s.DoctorId == dto.DoctorId)
+            .Select(s => new DetailDto
+            {
+                UserId = s.UserId,
+                Room = s.Room,
+                StartTime = s.StartTime,
+                EndTime = s.EndTime,
+                Status = s.Status,
+                Patient = s.User != null ? s.User.FullName : null
+            }).FirstAsync();
+
+        return Result<DetailDto>.Success(value);
+    }
 }

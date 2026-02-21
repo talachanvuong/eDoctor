@@ -78,4 +78,34 @@ public class HomeController : Controller
 
         return RedirectToAction("Index", "Home");
     }
+
+    [HttpGet]
+    [Authorize(Roles = RoleTypes.Doctor)]
+    public async Task<IActionResult> DetailSchedule(DetailViewModel vm)
+    {
+        DetailQueryDto dto = new DetailQueryDto
+        {
+            ScheduleId = vm.ScheduleId,
+            DoctorId = User.GetId()
+        };
+
+        Result<DetailDto> result = await _scheduleService.GetDetailAsync(dto);
+
+        if (!result.IsSuccess)
+        {
+            TempData.SetAlert(result.Error!, AlertTypes.Danger);
+
+            return RedirectToAction("Index", "Home");
+        }
+
+        DetailDto detail = result.Value!;
+
+        vm.UserId = detail.UserId;
+        vm.Room = detail.Room;
+        vm.Time = DateTimeHelper.ConvertToString(detail.StartTime, detail.EndTime);
+        vm.Status = detail.Status.ConvertToString();
+        vm.Patient = detail.Patient;
+
+        return View(vm);
+    }
 }
