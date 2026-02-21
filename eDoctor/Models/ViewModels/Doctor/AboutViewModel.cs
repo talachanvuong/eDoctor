@@ -1,6 +1,4 @@
-﻿using eDoctor.Enums;
-
-namespace eDoctor.Models.ViewModels.Doctor;
+﻿namespace eDoctor.Models.ViewModels.Doctor;
 
 public class AboutViewModel
 {
