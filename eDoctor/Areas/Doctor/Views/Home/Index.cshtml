@@ -1,1 +1,83 @@
-﻿<a class="btn btn-primary rounded-pill" asp-controller="Home" asp-action="CreateSchedule">Create new appointment</a>
+﻿@using eDoctor.Enums
+
+@model SchedulesViewModel
+
+@{
+    ViewData["UseContainer"] = true;
+}
+
+<form class="d-flex gap-2" method="get" asp-controller="Home" asp-action="Index">
+    <input class="form-control w-auto" type="date" onchange="this.form.submit()" asp-for="Date" />
+
+    <select class="form-select w-auto" onchange="this.form.submit()" asp-for="Status">
+        @if (Model.Status == null)
+        {
+            <option value="" selected>All</option>
+
+            @foreach (ScheduleStatus status in Enum.GetValues(typeof(ScheduleStatus)))
+            {
+                <option value="@((int)status)">@status.ConvertToString()</option>
+            }
+        }
+        else
+        {
+            <option value="">All</option>
+
+            @foreach (ScheduleStatus status in Enum.GetValues(typeof(ScheduleStatus)))
+            {
+                @if (status == Model.Status)
+                {
+                    <option value="@((int)status)" selected>@status.ConvertToString()</option>
+                }
+                else
+                {
+                    <option value="@((int)status)">@status.ConvertToString()</option>
+                }
+            }
+        }
+    </select>
+
+    <a class="btn btn-primary rounded-pill" asp-controller="Home" asp-action="CreateSchedule">Create new appointment</a>
+</form>
+
+<div class="card border-0 shadow-sm rounded-4 mt-3">
+    <div class="card-header bg-white border-bottom px-4 py-3 rounded-top-4 d-flex align-items-center justify-content-between">
+        <h6 class="mb-0 fw-bold text-dark">
+            <i class="bi bi-calendar3 me-2 text-primary"></i>Schedules
+        </h6>
+        <span class="badge bg-primary-subtle text-primary rounded-pill">
+            @Model.Schedules.Count() total
+        </span>
+    </div>
+
+    <div class="card-body p-0">
+        @if (Model.Schedules.Any())
+        {
+            <ul class="list-group list-group-flush">
+                @foreach (var item in Model.Schedules)
+                {
+                    <a class="list-group-item list-group-item-action px-4 py-3 d-flex align-items-center justify-content-between text-decoration-none text-dark" asp-controller="Home" asp-action="DetailSchedule" asp-route-ScheduleId="@item.ScheduleId">
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="bg-primary-subtle rounded-3 p-2 d-flex align-items-center justify-content-center" style="width: 36px; height: 36px;">
+                                <i class="bi bi-clock text-primary"></i>
+                            </div>
+                            <span class="fw-semibold">@item.Time</span>
+                        </div>
+
+                        <span class="badge rounded-pill px-3 py-2 fw-semibold bg-secondary-subtle text-secondary">
+                            @item.Status
+                        </span>
+                    </a>
+                }
+            </ul>
+        }
+        else
+        {
+            <div class="text-center py-5 text-muted">
+                <i class="bi bi-calendar-x fs-1 d-block mb-3 opacity-50"></i>
+                <p class="fw-semibold mb-1">No schedules found</p>
+                <small>There are no schedules available at the moment.</small>
+            </div>
+        }
+    </div>
+</div>

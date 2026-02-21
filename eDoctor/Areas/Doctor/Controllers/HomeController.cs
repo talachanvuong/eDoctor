@@ -1,10 +1,10 @@
-﻿using eDoctor.Areas.Doctor.Models.Dtos.Schedule.Queries;
+﻿using eDoctor.Areas.Doctor.Models.Dtos.Schedule;
+using eDoctor.Areas.Doctor.Models.Dtos.Schedule.Queries;
 using eDoctor.Areas.Doctor.Models.ViewModels.Schedule;
 using eDoctor.Helpers;
 using eDoctor.Helpers.ExtensionMethods;
 using eDoctor.Interfaces;
 using eDoctor.Results;
-using eDoctor.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -22,9 +22,24 @@ public class HomeController : Controller
 
     [HttpGet]
     [Authorize(Roles = RoleTypes.Doctor)]
-    public IActionResult Index()
+    public async Task<IActionResult> Index(SchedulesViewModel vm)
     {
-        return View();
+        SchedulesQueryDto dto = new SchedulesQueryDto
+        {
+            Date = vm.Date,
+            Status = vm.Status
+        };
+
+        SchedulesDto schedules = await _scheduleService.GetSchedulesAsync(dto);
+
+        vm.Schedules = schedules.Schedules.Select(s => new ScheduleViewModel
+        {
+            ScheduleId = s.ScheduleId,
+            Time = DateTimeHelper.ConvertToString(s.StartTime, s.EndTime),
+            Status = s.Status.ConvertToString()
+        });
+
+        return View(vm);
     }
 
     [HttpGet]

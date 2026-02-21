@@ -1,4 +1,5 @@
-﻿using eDoctor.Areas.Doctor.Models.Dtos.Schedule.Queries;
+﻿using eDoctor.Areas.Doctor.Models.Dtos.Schedule;
+using eDoctor.Areas.Doctor.Models.Dtos.Schedule.Queries;
 using eDoctor.Data;
 using eDoctor.Enums;
 using eDoctor.Interfaces;
@@ -41,5 +42,38 @@ public class ScheduleService : IScheduleService
         await _context.SaveChangesAsync();
 
         return Result.Success();
+    }
+
+    public async Task<SchedulesDto> GetSchedulesAsync(SchedulesQueryDto dto)
+    {
+        var query = _context.Schedules.AsQueryable();
+
+        if (dto.Date != null)
+        {
+            var startOfDay = dto.Date.Value.Date;
+            var endOfDay = startOfDay.AddDays(1);
+
+            query = query.Where(s => s.StartTime < endOfDay && s.EndTime > startOfDay);
+        }
+
+        if (dto.Status != null)
+        {
+            query = query.Where(s => s.Status == dto.Status);
+        }
+
+        IEnumerable<ScheduleDto> schedules = await query.OrderByDescending(s => s.StartTime)
+            .Select(s => new ScheduleDto
+            {
+                ScheduleId = s.ScheduleId,
+                StartTime = s.StartTime,
+                EndTime = s.EndTime,
+                Status = s.Status
+            })
+            .ToListAsync();
+
+        return new SchedulesDto
+        {
+            Schedules = schedules
+        };
     }
 }
