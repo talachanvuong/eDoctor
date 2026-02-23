@@ -4,9 +4,12 @@ using eDoctor.Interfaces;
 using eDoctor.Models.Dtos.Doctor;
 using eDoctor.Models.Dtos.Doctor.Fallbacks;
 using eDoctor.Models.Dtos.Doctor.Queries;
+using eDoctor.Models.Dtos.Payment;
+using eDoctor.Models.Dtos.Payment.Queries;
 using eDoctor.Models.Dtos.Schedule;
 using eDoctor.Models.Dtos.Schedule.Queries;
 using eDoctor.Models.ViewModels.Doctor;
+using eDoctor.Models.ViewModels.Payment;
 using eDoctor.Models.ViewModels.Schedule;
 using eDoctor.Results;
 using Microsoft.AspNetCore.Authorization;
@@ -18,11 +21,13 @@ public class HomeController : Controller
 {
     private readonly IDoctorService _doctorService;
     private readonly IScheduleService _scheduleService;
+    private readonly IPaymentService _paymentService;
 
-    public HomeController(IDoctorService doctorService, IScheduleService scheduleService)
+    public HomeController(IDoctorService doctorService, IScheduleService scheduleService, IPaymentService paymentService)
     {
         _doctorService = doctorService;
         _scheduleService = scheduleService;
+        _paymentService = paymentService;
     }
 
     [HttpGet]
@@ -139,6 +144,39 @@ public class HomeController : Controller
             ScheduleId = s.ScheduleId,
             Time = DateTimeHelper.ConvertToString(s.StartTime, s.EndTime),
         });
+
+        return View(vm);
+    }
+
+    [HttpGet]
+    [Authorize(Roles = RoleTypes.User)]
+    public async Task<IActionResult> Bill(BillViewModel vm)
+    {
+        BillQueryDto dto = new BillQueryDto
+        {
+            ScheduleId = vm.ScheduleId,
+            UserId = User.GetId()
+        };
+
+        Result<BillDto> result = await _paymentService.GetBillAsync(dto);
+
+        if (!result.IsSuccess)
+        {
+            TempData.SetAlert(result.Error!, AlertTypes.Danger);
+
+            return RedirectToAction("Doctors", "Home");
+        }
+
+        BillDto bill = result.Value!;
+
+        vm.Services = bill.Services.Select(s => new ServiceViewModel
+        {
+            ServiceName = s.ServiceName,
+            Price = s.Price
+        });
+
+        vm.Total = bill.Services.Sum(s => s.Price);
+        vm.Note = $"Meeting with {bill.RankCode.ConvertToString()} {bill.FullName} on {DateTimeHelper.ConvertToString(bill.StartTime, bill.EndTime)}.";
 
         return View(vm);
     }
