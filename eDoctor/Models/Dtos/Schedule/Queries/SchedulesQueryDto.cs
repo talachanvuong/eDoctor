@@ -1,4 +1,4 @@
-﻿namespace eDoctor.Models.Dtos.Doctor.Queries;
+﻿namespace eDoctor.Models.Dtos.Schedule.Queries;
 
 public class SchedulesQueryDto
 {

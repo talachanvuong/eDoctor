@@ -9,9 +9,9 @@ using Microsoft.EntityFrameworkCore;
 using AreaScheduleDto = eDoctor.Areas.Doctor.Models.Dtos.Schedule.ScheduleDto;
 using AreaSchedulesDto = eDoctor.Areas.Doctor.Models.Dtos.Schedule.SchedulesDto;
 using AreaSchedulesQueryDto = eDoctor.Areas.Doctor.Models.Dtos.Schedule.Queries.SchedulesQueryDto;
-using ScheduleDto = eDoctor.Models.Dtos.Doctor.ScheduleDto;
-using SchedulesDto = eDoctor.Models.Dtos.Doctor.SchedulesDto;
-using SchedulesQueryDto = eDoctor.Models.Dtos.Doctor.Queries.SchedulesQueryDto;
+using ScheduleDto = eDoctor.Models.Dtos.Schedule.ScheduleDto;
+using SchedulesDto = eDoctor.Models.Dtos.Schedule.SchedulesDto;
+using SchedulesQueryDto = eDoctor.Models.Dtos.Schedule.Queries.SchedulesQueryDto;
 
 namespace eDoctor.Services;
 

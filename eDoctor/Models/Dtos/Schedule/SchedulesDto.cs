@@ -1,4 +1,4 @@
-﻿namespace eDoctor.Models.Dtos.Doctor;
+﻿namespace eDoctor.Models.Dtos.Schedule;
 
 public class SchedulesDto
 {

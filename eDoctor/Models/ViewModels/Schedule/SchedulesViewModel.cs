@@ -1,4 +1,4 @@
-﻿namespace eDoctor.Models.ViewModels.Doctor;
+﻿namespace eDoctor.Models.ViewModels.Schedule;
 
 public class SchedulesViewModel
 {

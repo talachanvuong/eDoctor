@@ -3,8 +3,8 @@ using eDoctor.Areas.Doctor.Models.Dtos.Schedule.Queries;
 using eDoctor.Results;
 using AreaSchedulesDto = eDoctor.Areas.Doctor.Models.Dtos.Schedule.SchedulesDto;
 using AreaSchedulesQueryDto = eDoctor.Areas.Doctor.Models.Dtos.Schedule.Queries.SchedulesQueryDto;
-using SchedulesDto = eDoctor.Models.Dtos.Doctor.SchedulesDto;
-using SchedulesQueryDto = eDoctor.Models.Dtos.Doctor.Queries.SchedulesQueryDto;
+using SchedulesDto = eDoctor.Models.Dtos.Schedule.SchedulesDto;
+using SchedulesQueryDto = eDoctor.Models.Dtos.Schedule.Queries.SchedulesQueryDto;
 
 namespace eDoctor.Interfaces;
 
