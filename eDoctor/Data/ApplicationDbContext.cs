@@ -19,7 +19,6 @@ public class ApplicationDbContext : DbContext
     public DbSet<MedicalRecord> MedicalRecords { get; set; }
     public DbSet<DetailInvoice> DetailInvoices { get; set; }
     public DbSet<Invoice> Invoices { get; set; }
-    public DbSet<Payment> Payments { get; set; }
     public DbSet<Schedule> Schedules { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -60,8 +59,8 @@ public class ApplicationDbContext : DbContext
            .HasIndex(d => d.ServiceName)
            .IsUnique();
 
-        modelBuilder.Entity<Payment>()
-           .HasIndex(p => p.GatewayOrderId)
+        modelBuilder.Entity<Invoice>()
+           .HasIndex(i => i.OrderId)
            .IsUnique();
 
         modelBuilder.Entity<Schedule>()
