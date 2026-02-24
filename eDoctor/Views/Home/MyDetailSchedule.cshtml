@@ -1,0 +1,71 @@
+﻿@model MyDetailScheduleViewModel
+
+@{
+    ViewData["UseContainer"] = true;
+}
+
+<div class="d-flex align-items-center gap-2 mb-3">
+    <a class="btn btn-sm btn-light border rounded-pill" onclick="history.back()">
+        <i class="bi bi-arrow-left me-1"></i>Back
+    </a>
+    <h6 class="mb-0 fw-bold">Schedule Detail</h6>
+</div>
+
+<div class="card border-0 shadow-sm rounded-4">
+    <div class="card-header bg-white border-bottom px-4 py-3 rounded-top-4">
+        <h6 class="mb-0 fw-bold text-dark">
+            <i class="bi bi-calendar3 me-2 text-primary"></i>Detail
+        </h6>
+    </div>
+
+    <div class="card-body px-4 py-3">
+        <ul class="list-group list-group-flush">
+            <li class="list-group-item px-0 py-3 d-flex align-items-center gap-3">
+                <div class="bg-primary-subtle rounded-3 p-2 d-flex align-items-center justify-content-center" style="width: 36px; height: 36px; flex-shrink: 0;">
+                    <i class="bi bi-clock text-primary"></i>
+                </div>
+                <div>
+                    <div class="text-muted small">Time</div>
+                    <div class="fw-semibold">@Model.Time</div>
+                </div>
+            </li>
+
+            <li class="list-group-item px-0 py-3 d-flex align-items-center gap-3">
+                <div class="bg-primary-subtle rounded-3 p-2 d-flex align-items-center justify-content-center" style="width: 36px; height: 36px; flex-shrink: 0;">
+                    <i class="bi bi-door-open text-primary"></i>
+                </div>
+                <div>
+                    <div class="text-muted small">Room</div>
+                    <div class="fw-semibold">
+                        <form method="get" asp-controller="Home" asp-action="JoinRoom">
+                            <input type="hidden" asp-for="Room" />
+                            <button class="btn btn-link text-decoration-none text-primary fw-semibold p-0" type="submit">
+                                Join<i class="bi bi-box-arrow-up-right ms-1 small"></i>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </li>
+
+            <li class="list-group-item px-0 py-3 d-flex align-items-center gap-3">
+                <div class="bg-primary-subtle rounded-3 p-2 d-flex align-items-center justify-content-center" style="width: 36px; height: 36px; flex-shrink: 0;">
+                    <i class="bi bi-person-badge text-primary"></i>
+                </div>
+                <div>
+                    <div class="text-muted small">Doctor</div>
+                    <div class="fw-semibold">@Model.Doctor</div>
+                </div>
+            </li>
+
+            <li class="list-group-item px-0 py-3 d-flex align-items-center gap-3">
+                <div class="bg-primary-subtle rounded-3 p-2 d-flex align-items-center justify-content-center" style="width: 36px; height: 36px; flex-shrink: 0;">
+                    <i class="bi bi-info-circle text-primary"></i>
+                </div>
+                <div>
+                    <div class="text-muted small">Status</div>
+                    <div class="fw-semibold">@Model.Status</div>
+                </div>
+            </li>
+        </ul>
+    </div>
+</div>

@@ -8,7 +8,7 @@ public static class DateTimeHelper
     {
         return string.Format(
             CultureInfo.InvariantCulture,
-            "{0:HH:mm} - {1:HH:mm} ({0:ddd, dd MMM yyyy})",
+            "{0:HH:mm} - {1:HH:mm} ({0:ddd, MMM dd, yyyy})",
             startTime,
             endTime
         );

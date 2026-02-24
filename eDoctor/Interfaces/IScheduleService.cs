@@ -18,4 +18,5 @@ public interface IScheduleService
     Task<Result> CancelAsync(CancelQueryDto dto);
     Task<Result<SchedulesDto>> GetSchedulesAsync(SchedulesQueryDto dto);
     Task<MySchedulesDto> GetMySchedulesAsync(MySchedulesQueryDto dto);
+    Task<Result<MyDetailScheduleDto>> GetMyDetailScheduleAsync(MyDetailScheduleQueryDto dto);
 }
