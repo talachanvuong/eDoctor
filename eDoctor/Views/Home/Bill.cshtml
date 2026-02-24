@@ -43,11 +43,68 @@
     </div>
 
     <div class="card-footer bg-white border-top px-4 py-3 d-flex justify-content-end">
-        <form method="post" asp-controller="Home" asp-action="PayWithPaypal">
-            <input type="hidden" asp-for="ScheduleId" />
-            <button class="btn btn-primary rounded-pill px-4" type="submit">
-                <i class="bi bi-paypal me-1"></i>Pay with PayPal
-            </button>
-        </form>
+        <div id="paypal-button-container"></div>
     </div>
 </div>
+
+<form id="antiForgeryForm">
+    @Html.AntiForgeryToken()
+</form>
+
+<script
+    src="https://www.paypal.com/sdk/js?client-id=@ViewBag.ClientId&buyer-country=US&currency=USD&components=buttons&disable-funding=venmo,paylater,card"
+    data-sdk-integration-source="developer-studio">
+</script>
+
+<script>
+    const token = document.querySelector('#antiForgeryForm input[name="__RequestVerificationToken"]').value;
+
+    const model = {
+        scheduleId: @Model.ScheduleId,
+        services: @Html.Raw(Json.Serialize(Model.Services)),
+        total: @Model.Total
+    };
+
+    window.paypal.Buttons({
+        style: { shape: "pill", layout: "vertical", color: "blue", label: "paypal" },
+
+        createOrder: async () => {
+            const res = await fetch("/Home/CreateOrder", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "RequestVerificationToken": token
+                },
+                credentials: "include",
+                body: JSON.stringify({ total: model.total })
+            });
+
+            const { data, message } = await res.json();
+            if (!res.ok) throw new Error(message);
+            return data.orderId;
+        },
+
+        onApprove: async ({ orderID }) => {
+            const res = await fetch("/Home/Capture", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "RequestVerificationToken": token
+                },
+                credentials: "include",
+                body: JSON.stringify({ scheduleId: model.scheduleId, orderId: orderID, services: model.services })
+            });
+
+            if (!res.ok) {
+                const { message } = await res.json();
+                throw new Error(message);
+            }
+
+            window.location.href = "/Home/Index";
+        },
+
+        onError: (err) => {
+            alert(err.message);
+        }
+    }).render("#paypal-button-container");
+</script>

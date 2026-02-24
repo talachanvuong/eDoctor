@@ -7,4 +7,6 @@ namespace eDoctor.Interfaces;
 public interface IPaymentService
 {
     Task<Result<BillDto>> GetBillAsync(BillQueryDto dto);
+    Task<Result<CreateOrderDto>> CreateOrderAsync(CreateOrderQueryDto dto);
+    Task<Result> CaptureAsync(CaptureQueryDto dto);
 }

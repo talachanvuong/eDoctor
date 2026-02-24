@@ -4,6 +4,8 @@ using eDoctor.Services;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using PaypalServerSdk.Standard;
+using PaypalServerSdk.Standard.Authentication;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
@@ -62,6 +64,26 @@ builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IDoctorService, DoctorService>();
 builder.Services.AddScoped<IScheduleService, ScheduleService>();
 builder.Services.AddScoped<IPaymentService, PaymentService>();
+
+string? paypalClientId = builder.Configuration["PayPal:OAuthClientId"];
+string? paypalClientSecret = builder.Configuration["PayPal:OAuthClientSecret"];
+
+if (paypalClientId == null || paypalClientSecret == null)
+{
+    throw new Exception("PayPal setting not found");
+}
+
+builder.Services.AddSingleton(service =>
+    new PaypalServerSdkClient.Builder()
+        .ClientCredentialsAuth(
+            new ClientCredentialsAuthModel.Builder(
+                paypalClientId,
+                paypalClientSecret
+            )
+            .Build())
+        .Environment(PaypalServerSdk.Standard.Environment.Sandbox)
+        .Build()
+);
 
 
 WebApplication app = builder.Build();

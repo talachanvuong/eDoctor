@@ -22,12 +22,14 @@ public class HomeController : Controller
     private readonly IDoctorService _doctorService;
     private readonly IScheduleService _scheduleService;
     private readonly IPaymentService _paymentService;
+    private readonly IConfiguration _configuration;
 
-    public HomeController(IDoctorService doctorService, IScheduleService scheduleService, IPaymentService paymentService)
+    public HomeController(IDoctorService doctorService, IScheduleService scheduleService, IPaymentService paymentService, IConfiguration configuration)
     {
         _doctorService = doctorService;
         _scheduleService = scheduleService;
         _paymentService = paymentService;
+        _configuration = configuration;
     }
 
     [HttpGet]
@@ -178,6 +180,62 @@ public class HomeController : Controller
         vm.Total = bill.Services.Sum(s => s.Price);
         vm.Note = $"Meeting with {bill.RankCode.ConvertToString()} {bill.FullName} on {DateTimeHelper.ConvertToString(bill.StartTime, bill.EndTime)}.";
 
+        ViewBag.ClientId = _configuration["PayPal:OAuthClientId"];
+
         return View(vm);
+    }
+
+    [HttpPost]
+    [Authorize(Roles = RoleTypes.User)]
+    public async Task<IActionResult> CreateOrder([FromBody] CreateOrderViewModel vm)
+    {
+        CreateOrderQueryDto dto = new CreateOrderQueryDto
+        {
+            Total = vm.Total
+        };
+
+        Result<CreateOrderDto> result = await _paymentService.CreateOrderAsync(dto);
+
+        if (!result.IsSuccess)
+        {
+            return BadRequest(new
+            {
+                message = result.Error
+            });
+        }
+
+        return Ok(new
+        {
+            data = result.Value
+        });
+    }
+
+    [HttpPost]
+    [Authorize(Roles = RoleTypes.User)]
+    public async Task<IActionResult> Capture([FromBody] CaptureViewModel vm)
+    {
+        CaptureQueryDto dto = new CaptureQueryDto
+        {
+            ScheduleId = vm.ScheduleId,
+            UserId = User.GetId(),
+            OrderId = vm.OrderId,
+            Services = vm.Services.Select(s => new ServiceQueryDto
+            {
+                ServiceName = s.ServiceName,
+                Price = s.Price
+            })
+        };
+
+        Result result = await _paymentService.CaptureAsync(dto);
+
+        if (!result.IsSuccess)
+        {
+            return BadRequest(new
+            {
+                message = result.Error
+            });
+        }
+
+        return Ok();
     }
 }
