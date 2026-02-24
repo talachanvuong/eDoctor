@@ -4,6 +4,8 @@ using eDoctor.Data;
 using eDoctor.Enums;
 using eDoctor.Interfaces;
 using eDoctor.Models;
+using eDoctor.Models.Dtos.Schedule;
+using eDoctor.Models.Dtos.Schedule.Queries;
 using eDoctor.Results;
 using Microsoft.EntityFrameworkCore;
 using AreaScheduleDto = eDoctor.Areas.Doctor.Models.Dtos.Schedule.ScheduleDto;
@@ -159,5 +161,25 @@ public class ScheduleService : IScheduleService
         };
 
         return Result<SchedulesDto>.Success(value);
+    }
+
+    public async Task<MySchedulesDto> GetMySchedulesAsync(MySchedulesQueryDto dto)
+    {
+        IEnumerable<MyScheduleDto> schedules = await _context.Schedules
+            .Where(s => s.UserId == dto.UserId)
+            .OrderByDescending(s => s.StartTime)
+            .Select(s => new MyScheduleDto
+            {
+                ScheduleId = s.ScheduleId,
+                StartTime = s.StartTime,
+                EndTime = s.EndTime,
+                Status = s.Status
+            })
+            .ToListAsync();
+
+        return new MySchedulesDto
+        {
+            Schedules = schedules
+        };
     }
 }

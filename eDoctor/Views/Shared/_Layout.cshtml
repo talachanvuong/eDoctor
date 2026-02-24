@@ -24,6 +24,12 @@
                     <li class="nav-item">
                         <a class="nav-link" asp-controller="Home" asp-action="Doctors">Doctors</a>
                     </li>
+                    @if (User.IsInRole(RoleTypes.User))
+                    {
+                        <li class="nav-item">
+                            <a class="nav-link" asp-controller="Home" asp-action="MySchedules">Schedules</a>
+                        </li>
+                    }
                 </ul>
                 <ul class="navbar-nav ms-auto">
                     @if (User.IsInRole(RoleTypes.User))

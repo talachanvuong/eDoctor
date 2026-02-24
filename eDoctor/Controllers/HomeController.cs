@@ -144,7 +144,7 @@ public class HomeController : Controller
         vm.Schedules = schedules.Schedules.Select(s => new ScheduleViewModel
         {
             ScheduleId = s.ScheduleId,
-            Time = DateTimeHelper.ConvertToString(s.StartTime, s.EndTime),
+            Time = DateTimeHelper.ConvertToString(s.StartTime, s.EndTime)
         });
 
         return View(vm);
@@ -237,5 +237,26 @@ public class HomeController : Controller
         }
 
         return Ok();
+    }
+
+    [HttpGet]
+    [Authorize(Roles = RoleTypes.User)]
+    public async Task<IActionResult> MySchedules(MySchedulesViewModel vm)
+    {
+        MySchedulesQueryDto dto = new MySchedulesQueryDto
+        {
+            UserId = User.GetId()
+        };
+
+        MySchedulesDto schedules = await _scheduleService.GetMySchedulesAsync(dto);
+
+        vm.Schedules = schedules.Schedules.Select(s => new MyScheduleViewModel
+        {
+            ScheduleId = s.ScheduleId,
+            Time = DateTimeHelper.ConvertToString(s.StartTime, s.EndTime),
+            Status = s.Status.ConvertToString()
+        });
+
+        return View(vm);
     }
 }
