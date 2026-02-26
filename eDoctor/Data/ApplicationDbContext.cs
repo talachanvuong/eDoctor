@@ -51,14 +51,6 @@ public class ApplicationDbContext : DbContext
             .HasIndex(s => s.ServiceName)
             .IsUnique();
 
-        modelBuilder.Entity<DetailPrescription>()
-           .HasIndex(d => d.DrugName)
-           .IsUnique();
-
-        modelBuilder.Entity<DetailInvoice>()
-           .HasIndex(d => d.ServiceName)
-           .IsUnique();
-
         modelBuilder.Entity<Invoice>()
            .HasIndex(i => i.OrderId)
            .IsUnique();
@@ -74,8 +66,7 @@ public class ApplicationDbContext : DbContext
             ));
 
         modelBuilder.Entity<Schedule>()
-           .HasIndex(s => new { s.DoctorId, s.UserId })
-           .IsUnique();
+           .HasIndex(s => new { s.DoctorId, s.UserId });
 
         modelBuilder.Entity<Service>()
             .Property(s => s.Price)
