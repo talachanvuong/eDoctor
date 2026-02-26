@@ -70,6 +70,7 @@ builder.Services.AddScoped<IDoctorService, DoctorService>();
 builder.Services.AddScoped<IScheduleService, ScheduleService>();
 builder.Services.AddScoped<IPaymentService, PaymentService>();
 
+// PayPal
 string? paypalClientId = builder.Configuration["PayPal:OAuthClientId"];
 string? paypalClientSecret = builder.Configuration["PayPal:OAuthClientSecret"];
 
