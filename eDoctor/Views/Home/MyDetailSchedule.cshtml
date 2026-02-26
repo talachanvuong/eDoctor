@@ -66,6 +66,20 @@
                     <div class="fw-semibold">@Model.Status</div>
                 </div>
             </li>
+
+            <li class="list-group-item px-0 py-3 d-flex align-items-center gap-3">
+                <div class="bg-primary-subtle rounded-3 p-2 d-flex align-items-center justify-content-center" style="width: 36px; height: 36px; flex-shrink: 0;">
+                    <i class="bi bi-receipt text-primary"></i>
+                </div>
+                <div>
+                    <div class="text-muted small">Invoice</div>
+                    <div class="fw-semibold">
+                        <a class="btn btn-link text-decoration-none text-primary fw-semibold p-0" asp-controller="Home" asp-action="Invoice" asp-route-ScheduleId="@Model.ScheduleId">
+                            View<i class="bi bi-box-arrow-up-right ms-1 small"></i>
+                        </a>
+                    </div>
+                </div>
+            </li>
         </ul>
     </div>
 </div>

@@ -18,11 +18,13 @@ public class PaymentService : IPaymentService
 {
     private readonly ApplicationDbContext _context;
     private readonly PaypalServerSdkClient _paypal;
+    private readonly IPdfService _pdfService;
 
-    public PaymentService(ApplicationDbContext context, PaypalServerSdkClient paypal)
+    public PaymentService(ApplicationDbContext context, PaypalServerSdkClient paypal, IPdfService pdfService)
     {
         _context = context;
         _paypal = paypal;
+        _pdfService = pdfService;
     }
 
     public async Task<Result<BillDto>> GetBillAsync(BillQueryDto dto)
@@ -149,5 +151,35 @@ public class PaymentService : IPaymentService
         {
             return Result<CreateOrderDto>.Failure(e.Message);
         }
+    }
+
+    public async Task<Result<InvoiceDto>> GetInvoiceAsync(InvoiceQueryDto dto)
+    {
+        if (!await _context.Invoices.AnyAsync(i => i.ScheduleId == dto.ScheduleId && i.Schedule.UserId == dto.UserId))
+        {
+            return Result<InvoiceDto>.Failure("Invoice not found.");
+        }
+
+        DetailInvoiceDto detailInvoice = await _context.Invoices
+            .Where(i => i.ScheduleId == dto.ScheduleId && i.Schedule.UserId == dto.UserId)
+            .Select(i => new DetailInvoiceDto
+            {
+                InvoiceId = i.InvoiceId,
+                CreatedAt = i.CreatedAt,
+                Services = i.DetailInvoices.Select(di => new ServiceDto
+                {
+                    ServiceName = di.ServiceName,
+                    Price = di.Price
+                }),
+                Payer = i.Schedule.User!.FullName
+            })
+            .FirstAsync();
+
+        InvoiceDto value = new InvoiceDto
+        {
+            Pdf = _pdfService.GenerateInvoice(detailInvoice)
+        };
+
+        return Result<InvoiceDto>.Success(value);
     }
 }

@@ -288,4 +288,28 @@ public class HomeController : Controller
 
         return View(vm);
     }
+
+    [HttpGet]
+    [Authorize(Roles = RoleTypes.User)]
+    public async Task<IActionResult> Invoice(InvoiceViewModel vm)
+    {
+        InvoiceQueryDto dto = new InvoiceQueryDto
+        {
+            ScheduleId = vm.ScheduleId,
+            UserId = User.GetId()
+        };
+
+        Result<InvoiceDto> result = await _paymentService.GetInvoiceAsync(dto);
+
+        if (!result.IsSuccess)
+        {
+            TempData.SetAlert(result.Error!, AlertTypes.Danger);
+
+            return RedirectToAction("Index", "Home");
+        }
+
+        InvoiceDto invoice = result.Value!;
+
+        return File(invoice.Pdf, "application/pdf");
+    }
 }
