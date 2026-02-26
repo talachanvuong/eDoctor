@@ -1,18 +1,10 @@
-using eDoctor.Helpers;
 using eDoctor.Helpers.ExtensionMethods;
 using eDoctor.Interfaces;
 using eDoctor.Models.Dtos.Doctor;
 using eDoctor.Models.Dtos.Doctor.Fallbacks;
 using eDoctor.Models.Dtos.Doctor.Queries;
-using eDoctor.Models.Dtos.Payment;
-using eDoctor.Models.Dtos.Payment.Queries;
-using eDoctor.Models.Dtos.Schedule;
-using eDoctor.Models.Dtos.Schedule.Queries;
 using eDoctor.Models.ViewModels.Doctor;
-using eDoctor.Models.ViewModels.Payment;
-using eDoctor.Models.ViewModels.Schedule;
 using eDoctor.Results;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace eDoctor.Controllers;
@@ -20,16 +12,10 @@ namespace eDoctor.Controllers;
 public class HomeController : Controller
 {
     private readonly IDoctorService _doctorService;
-    private readonly IScheduleService _scheduleService;
-    private readonly IPaymentService _paymentService;
-    private readonly IConfiguration _configuration;
 
-    public HomeController(IDoctorService doctorService, IScheduleService scheduleService, IPaymentService paymentService, IConfiguration configuration)
+    public HomeController(IDoctorService doctorService)
     {
         _doctorService = doctorService;
-        _scheduleService = scheduleService;
-        _paymentService = paymentService;
-        _configuration = configuration;
     }
 
     [HttpGet]
@@ -117,199 +103,5 @@ public class HomeController : Controller
         });
 
         return View(vm);
-    }
-
-    [HttpGet]
-    [Authorize(Roles = RoleTypes.User)]
-    public async Task<IActionResult> Schedules(SchedulesViewModel vm)
-    {
-        SchedulesQueryDto dto = new SchedulesQueryDto
-        {
-            DoctorId = vm.DoctorId,
-            Date = vm.Date,
-            UserId = User.GetId()
-        };
-
-        Result<SchedulesDto> result = await _scheduleService.GetSchedulesAsync(dto);
-
-        if (!result.IsSuccess)
-        {
-            TempData.SetAlert(result.Error!, AlertTypes.Danger);
-
-            return RedirectToAction("Doctors", "Home");
-        }
-
-        SchedulesDto schedules = result.Value!;
-
-        vm.Schedules = schedules.Schedules.Select(s => new ScheduleViewModel
-        {
-            ScheduleId = s.ScheduleId,
-            Time = DateTimeHelper.ConvertToString(s.StartTime, s.EndTime)
-        });
-
-        return View(vm);
-    }
-
-    [HttpGet]
-    [Authorize(Roles = RoleTypes.User)]
-    public async Task<IActionResult> Bill(BillViewModel vm)
-    {
-        BillQueryDto dto = new BillQueryDto
-        {
-            ScheduleId = vm.ScheduleId,
-            UserId = User.GetId()
-        };
-
-        Result<BillDto> result = await _paymentService.GetBillAsync(dto);
-
-        if (!result.IsSuccess)
-        {
-            TempData.SetAlert(result.Error!, AlertTypes.Danger);
-
-            return RedirectToAction("Doctors", "Home");
-        }
-
-        BillDto bill = result.Value!;
-
-        vm.Services = bill.Services.Select(s => new ServiceViewModel
-        {
-            ServiceName = s.ServiceName,
-            Price = s.Price
-        });
-
-        vm.Total = bill.Services.Sum(s => s.Price);
-        vm.Note = $"Meeting with {bill.RankCode.ConvertToString()} {bill.FullName} on {DateTimeHelper.ConvertToString(bill.StartTime, bill.EndTime)}.";
-
-        ViewBag.ClientId = _configuration["PayPal:OAuthClientId"];
-
-        return View(vm);
-    }
-
-    [HttpPost]
-    [Authorize(Roles = RoleTypes.User)]
-    public async Task<IActionResult> CreateOrder([FromBody] CreateOrderViewModel vm)
-    {
-        CreateOrderQueryDto dto = new CreateOrderQueryDto
-        {
-            Total = vm.Total
-        };
-
-        Result<CreateOrderDto> result = await _paymentService.CreateOrderAsync(dto);
-
-        if (!result.IsSuccess)
-        {
-            return BadRequest(new
-            {
-                message = result.Error
-            });
-        }
-
-        return Ok(new
-        {
-            data = result.Value
-        });
-    }
-
-    [HttpPost]
-    [Authorize(Roles = RoleTypes.User)]
-    public async Task<IActionResult> Capture([FromBody] CaptureViewModel vm)
-    {
-        CaptureQueryDto dto = new CaptureQueryDto
-        {
-            ScheduleId = vm.ScheduleId,
-            UserId = User.GetId(),
-            OrderId = vm.OrderId,
-            Services = vm.Services.Select(s => new ServiceQueryDto
-            {
-                ServiceName = s.ServiceName,
-                Price = s.Price
-            })
-        };
-
-        Result result = await _paymentService.CaptureAsync(dto);
-
-        if (!result.IsSuccess)
-        {
-            return BadRequest(new
-            {
-                message = result.Error
-            });
-        }
-
-        return Ok();
-    }
-
-    [HttpGet]
-    [Authorize(Roles = RoleTypes.User)]
-    public async Task<IActionResult> MySchedules(MySchedulesViewModel vm)
-    {
-        MySchedulesQueryDto dto = new MySchedulesQueryDto
-        {
-            UserId = User.GetId()
-        };
-
-        MySchedulesDto schedules = await _scheduleService.GetMySchedulesAsync(dto);
-
-        vm.Schedules = schedules.Schedules.Select(s => new MyScheduleViewModel
-        {
-            ScheduleId = s.ScheduleId,
-            Time = DateTimeHelper.ConvertToString(s.StartTime, s.EndTime),
-            Status = s.Status.ConvertToString()
-        });
-
-        return View(vm);
-    }
-
-    [HttpGet]
-    [Authorize(Roles = RoleTypes.User)]
-    public async Task<IActionResult> MyDetailSchedule(MyDetailScheduleViewModel vm)
-    {
-        MyDetailScheduleQueryDto dto = new MyDetailScheduleQueryDto
-        {
-            ScheduleId = vm.ScheduleId,
-            UserId = User.GetId()
-        };
-
-        Result<MyDetailScheduleDto> result = await _scheduleService.GetMyDetailScheduleAsync(dto);
-
-        if (!result.IsSuccess)
-        {
-            TempData.SetAlert(result.Error!, AlertTypes.Danger);
-
-            return RedirectToAction("MySchedules", "Home");
-        }
-
-        MyDetailScheduleDto detail = result.Value!;
-
-        vm.Room = detail.Room;
-        vm.Time = DateTimeHelper.ConvertToString(detail.StartTime, detail.EndTime);
-        vm.Status = detail.Status.ConvertToString();
-        vm.Doctor = $"{detail.RankCode.ConvertToString()} {detail.FullName}";
-
-        return View(vm);
-    }
-
-    [HttpGet]
-    [Authorize(Roles = RoleTypes.User)]
-    public async Task<IActionResult> Invoice(InvoiceViewModel vm)
-    {
-        InvoiceQueryDto dto = new InvoiceQueryDto
-        {
-            ScheduleId = vm.ScheduleId,
-            UserId = User.GetId()
-        };
-
-        Result<InvoiceDto> result = await _paymentService.GetInvoiceAsync(dto);
-
-        if (!result.IsSuccess)
-        {
-            TempData.SetAlert(result.Error!, AlertTypes.Danger);
-
-            return RedirectToAction("Index", "Home");
-        }
-
-        InvoiceDto invoice = result.Value!;
-
-        return File(invoice.Pdf, "application/pdf");
     }
 }

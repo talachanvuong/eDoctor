@@ -69,7 +69,7 @@
         style: { shape: "pill", layout: "vertical", color: "blue", label: "paypal" },
 
         createOrder: async () => {
-            const res = await fetch("/Home/CreateOrder", {
+            const res = await fetch("/Payment/CreateOrder", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -85,7 +85,7 @@
         },
 
         onApprove: async ({ orderID }) => {
-            const res = await fetch("/Home/Capture", {
+            const res = await fetch("/Payment/Capture", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -100,7 +100,7 @@
                 throw new Error(message);
             }
 
-            window.location.href = "/Home/MySchedules";
+            window.location.href = "/Schedule/MySchedules";
         },
 
         onError: (err) => {

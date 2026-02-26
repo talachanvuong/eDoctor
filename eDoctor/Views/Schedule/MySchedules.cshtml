@@ -24,7 +24,7 @@
             <ul class="list-group list-group-flush">
                 @foreach (var item in upcoming)
                 {
-                    <a class="list-group-item list-group-item-action px-4 py-3 d-flex align-items-center justify-content-between text-decoration-none text-dark" asp-controller="Home" asp-action="MyDetailSchedule" asp-route-ScheduleId="@item.ScheduleId">
+                    <a class="list-group-item list-group-item-action px-4 py-3 d-flex align-items-center justify-content-between text-decoration-none text-dark" asp-controller="Schedule" asp-action="MyDetailSchedule" asp-route-ScheduleId="@item.ScheduleId">
                         <div class="d-flex align-items-center gap-3">
                             <div class="bg-primary-subtle rounded-3 p-2 d-flex align-items-center justify-content-center" style="width: 36px; height: 36px; flex-shrink: 0;">
                                 <i class="bi bi-clock text-primary"></i>
@@ -68,7 +68,7 @@
             <ul class="list-group list-group-flush">
                 @foreach (var item in history)
                 {
-                    <a class="list-group-item list-group-item-action px-4 py-3 d-flex align-items-center justify-content-between text-decoration-none text-dark" asp-controller="Home" asp-action="MyDetailSchedule" asp-route-ScheduleId="@item.ScheduleId">
+                    <a class="list-group-item list-group-item-action px-4 py-3 d-flex align-items-center justify-content-between text-decoration-none text-dark" asp-controller="Schedule" asp-action="MyDetailSchedule" asp-route-ScheduleId="@item.ScheduleId">
                         <div class="d-flex align-items-center gap-3">
                             <div class="bg-secondary-subtle rounded-3 p-2 d-flex align-items-center justify-content-center" style="width: 36px; height: 36px; flex-shrink: 0;">
                                 <i class="bi bi-clock-history text-secondary"></i>

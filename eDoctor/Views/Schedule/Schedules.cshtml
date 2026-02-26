@@ -4,7 +4,7 @@
     ViewData["UseContainer"] = true;
 }
 
-<form class="d-flex gap-2" method="get" asp-controller="Home" asp-action="Schedules">
+<form class="d-flex gap-2" method="get" asp-controller="Schedule" asp-action="Schedules">
     <input type="hidden" asp-for="DoctorId" />
     <input class="form-control w-auto" type="date" onchange="this.form.submit()" asp-for="Date" />
 </form>
@@ -33,7 +33,7 @@
                             <span class="fw-semibold">@item.Time</span>
                         </div>
 
-                        <a class="btn btn-sm btn-primary rounded-pill px-3" asp-controller="Home" asp-action="Bill" asp-route-ScheduleId="@item.ScheduleId">
+                        <a class="btn btn-sm btn-primary rounded-pill px-3" asp-controller="Payment" asp-action="Bill" asp-route-ScheduleId="@item.ScheduleId">
                             <i class="bi bi-calendar-check me-1"></i>Book
                         </a>
                     </li>
