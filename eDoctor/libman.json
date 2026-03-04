@@ -9,6 +9,14 @@
     {
       "library": "bootstrap-icons@1.13.1",
       "destination": "wwwroot/lib/bootstrap-icons/"
+    },
+    {
+      "library": "microsoft-signalr@9.0.6",
+      "destination": "wwwroot/lib/microsoft-signalr/"
+    },
+    {
+      "library": "simple-peer@9.11.1",
+      "destination": "wwwroot/lib/simple-peer/"
     }
   ]
 }

@@ -1,0 +1,241 @@
+﻿@model RoomViewModel
+
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>eDoctor</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/lib/bootstrap-icons/font/bootstrap-icons.min.css" />
+</head>
+<body>
+    <div class="d-none d-md-flex vh-100 bg-dark gap-3 p-3">
+        <div class="flex-grow-1 rounded-4 overflow-hidden bg-black border border-secondary d-flex align-items-center justify-content-center">
+            <div id="remotePlaceholder" class="text-center">
+                <i class="bi bi-person-x fs-1 text-secondary"></i>
+                <p class="text-secondary mt-2 mb-0">Doctor has not joined</p>
+            </div>
+            <div id="remoteCamOff" class="text-center d-none">
+                <i class="bi bi-camera-video-off fs-1 text-warning"></i>
+                <p class="text-secondary mt-2 mb-0">Camera is off</p>
+            </div>
+            <video id="remoteVideo" class="w-100 h-100 object-fit-cover d-none" autoplay playsinline></video>
+        </div>
+
+        <div class="col-3 d-flex flex-column gap-3">
+            <div class="d-flex justify-content-center gap-2">
+                <button id="btnCam" onclick="toggleCam()" class="btn btn-primary rounded-circle">
+                    <i id="iconCam" class="bi bi-camera-video-fill"></i>
+                </button>
+                <button id="btnMic" onclick="toggleMic()" class="btn btn-primary rounded-circle">
+                    <i id="iconMic" class="bi bi-mic-fill"></i>
+                </button>
+                <button onclick="leaveRoom()" class="btn btn-danger rounded-circle">
+                    <i class="bi bi-telephone-x-fill"></i>
+                </button>
+            </div>
+
+            <div class="flex-fill rounded-4 overflow-hidden bg-black border border-secondary d-flex align-items-center justify-content-center">
+                <div id="localCamOff" class="text-center">
+                    <i class="bi bi-camera-video-off fs-1 text-warning"></i>
+                    <p class="text-secondary mt-2 mb-0">Camera is off</p>
+                </div>
+                <video id="localVideo" class="w-100 h-100 object-fit-cover d-none" autoplay muted playsinline></video>
+            </div>
+        </div>
+    </div>
+
+    <div class="d-flex d-md-none vh-100 align-items-center justify-content-center text-center">
+        <div>
+            <h1>HEY</h1>
+            <p>We do not provide a mobile version!</p>
+        </div>
+    </div>
+
+    <div class="position-fixed top-0 start-50 translate-middle-x mt-3" style="z-index: 9999;">
+        <div id="toastEl" class="toast text-bg-danger border-0">
+            <div id="toastMsg" class="toast-body fw-semibold"></div>
+        </div>
+    </div>
+
+    <script src="~/lib/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script src="~/lib/microsoft-signalr/signalr.min.js"></script>
+    <script src="~/lib/simple-peer/simplepeer.min.js"></script>
+
+    <script>
+        const ROOM = '@Model.Room';
+
+        let localStream = null;
+        let peer = null;
+        let connected = false;
+        let camOn = false;
+        let micOn = true;
+
+        function showError(msg) {
+            document.getElementById('toastMsg').textContent = msg;
+            bootstrap.Toast.getOrCreateInstance(
+                document.getElementById('toastEl'), { delay: 4000 }
+            ).show();
+        }
+
+        function setRemoteState(state) {
+            document.getElementById('remotePlaceholder').classList.toggle('d-none', state !== 'waiting');
+            document.getElementById('remoteCamOff').classList.toggle('d-none', state !== 'cam_off');
+            document.getElementById('remoteVideo').classList.toggle('d-none', state !== 'cam_on');
+        }
+
+        function setLocalCamUI(on) {
+            document.getElementById('localCamOff').classList.toggle('d-none', on);
+            document.getElementById('localVideo').classList.toggle('d-none', !on);
+        }
+
+        const conn = new signalR.HubConnectionBuilder()
+            .withUrl('/MeetingHub')
+            .withAutomaticReconnect()
+            .build();
+
+        conn.on('Error', msg => {
+            showError(msg);
+            setTimeout(() => window.location.href = '/Schedule/MySchedules', 3000);
+        });
+
+        conn.on('ReceiveSignal', data => {
+            if (!peer) {
+                createPeer(false);
+            }
+
+            peer.signal(JSON.parse(data));
+        });
+
+        conn.on('UserJoined', () => {
+            if (!connected) {
+                createPeer(true);
+            }
+        });
+
+        conn.on('UserLeft', () => {
+            cleanupRemote();
+        });
+
+        conn.on('RemoteCameraChanged', isOn => {
+            setRemoteState(isOn ? 'cam_on' : 'cam_off');
+        });
+
+        function createPeer(isInitiator) {
+            if (peer) {
+                peer.destroy();
+                peer = null;
+            }
+
+            peer = new SimplePeer({
+                initiator: isInitiator,
+                trickle: false,
+                stream: localStream
+            });
+
+            peer.on('signal', data => {
+                conn.invoke('SendSignal', ROOM, JSON.stringify(data));
+            });
+
+            peer.on('stream', stream => {
+                document.getElementById('remoteVideo').srcObject = stream;
+                setRemoteState('cam_on');
+            });
+
+            peer.on('connect', () => {
+                connected = true;
+            });
+
+            peer.on('close', () => {
+                connected = false;
+                setRemoteState('waiting');
+                peer = null;
+            });
+
+            peer.on('error', err => {
+                showError(err.message);
+            });
+
+            peer._pc.oniceconnectionstatechange = () => {
+                const state = peer._pc.iceConnectionState;
+
+                if (state === 'failed' || state === 'disconnected') {
+                    cleanupRemote();
+                }
+            };
+        }
+
+        async function toggleCam() {
+            const track = localStream?.getVideoTracks()[0];
+            if (!track) return;
+            camOn = !camOn;
+            track.enabled = camOn;
+            setLocalCamUI(camOn);
+            document.getElementById('iconCam').className = camOn ? 'bi bi-camera-video-fill' : 'bi bi-camera-video-off-fill';
+            document.getElementById('btnCam').classList.toggle('btn-primary', camOn);
+            document.getElementById('btnCam').classList.toggle('btn-secondary', !camOn);
+            await conn.invoke('CameraStateChanged', ROOM, camOn);
+        }
+
+        function toggleMic() {
+            const track = localStream?.getAudioTracks()[0];
+            if (!track) return;
+            micOn = !micOn;
+            track.enabled = micOn;
+            document.getElementById('iconMic').className = micOn ? 'bi bi-mic-fill' : 'bi bi-mic-mute-fill';
+            document.getElementById('btnMic').classList.toggle('btn-primary', micOn);
+            document.getElementById('btnMic').classList.toggle('btn-secondary', !micOn);
+        }
+
+        function leaveRoom() {
+            localStream?.getTracks().forEach(t => t.stop());
+            peer?.destroy();
+            conn.stop();
+            window.location.href = '/Schedule/MySchedules';
+        }
+
+        function cleanupRemote() {
+            connected = false;
+
+            const remoteVideo = document.getElementById('remoteVideo');
+
+            if (remoteVideo.srcObject) {
+                remoteVideo.srcObject.getTracks().forEach(t => t.stop());
+                remoteVideo.srcObject = null;
+            }
+
+            setRemoteState('waiting');
+
+            if (peer) {
+                peer.destroy();
+                peer = null;
+            }
+        }
+
+        async function init() {
+            try {
+                localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+                document.getElementById('localVideo').srcObject = localStream;
+
+                camOn = true;
+                setLocalCamUI(true);
+                document.getElementById('btnCam').classList.replace('btn-secondary', 'btn-primary');
+
+                await conn.start();
+                await conn.invoke('Join', ROOM);
+
+                setRemoteState('waiting');
+            } catch (e) {
+                showError(e.message);
+            }
+        }
+
+        init();
+    </script>
+</body>
+</html>

@@ -1,4 +1,5 @@
 using eDoctor.Data;
+using eDoctor.Hubs;
 using eDoctor.Interfaces;
 using eDoctor.Services;
 using Microsoft.AspNetCore.Authentication.Cookies;
@@ -47,6 +48,9 @@ builder.Services.AddControllersWithViews(options =>
     options.Filters.Add(new AutoValidateAntiforgeryTokenAttribute());
 });
 
+// SignalR
+builder.Services.AddSignalR();
+
 // Database
 string? connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
@@ -69,6 +73,7 @@ builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IDoctorService, DoctorService>();
 builder.Services.AddScoped<IScheduleService, ScheduleService>();
 builder.Services.AddScoped<IPaymentService, PaymentService>();
+builder.Services.AddScoped<IMeetingService, MeetingService>();
 
 // PayPal
 string? paypalClientId = builder.Configuration["PayPal:OAuthClientId"];
@@ -118,5 +123,7 @@ app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}")
     .WithStaticAssets();
+
+app.MapHub<MeetingHub>("/MeetingHub");
 
 app.Run();

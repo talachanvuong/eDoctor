@@ -15,4 +15,16 @@ public static class ClaimHelper
 
         return int.Parse(idClaim.Value);
     }
+
+    public static string GetRole(this ClaimsPrincipal principal)
+    {
+        Claim? roleClaim = principal.FindFirst(ClaimTypes.Role);
+
+        if (roleClaim == null)
+        {
+            throw new Exception("Missing role claim");
+        }
+
+        return roleClaim.Value;
+    }
 }
