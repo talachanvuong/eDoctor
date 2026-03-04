@@ -136,9 +136,7 @@ public class PaymentService : IPaymentService
                 });
             }
 
-            // Create room
-
-            // Update room to schedule
+            schedule.Room = Guid.NewGuid().ToString("N");
             schedule.Status = ScheduleStatus.ORDERED;
             schedule.UserId = dto.UserId;
             schedule.Invoice = invoice;
