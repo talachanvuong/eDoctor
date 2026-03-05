@@ -1,12 +1,14 @@
 using eDoctor.Data;
 using eDoctor.Hubs;
 using eDoctor.Interfaces;
+using eDoctor.Jobs;
 using eDoctor.Services;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using PaypalServerSdk.Standard;
 using PaypalServerSdk.Standard.Authentication;
+using Quartz;
 using QuestPDF.Infrastructure;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
@@ -95,6 +97,23 @@ builder.Services.AddSingleton(service =>
         .Environment(PaypalServerSdk.Standard.Environment.Sandbox)
         .Build()
 );
+
+// Quartz
+builder.Services.AddQuartz(q =>
+{
+    JobKey jobKey = new JobKey("ScheduleStatusJob");
+    q.AddJob<ScheduleStatusJob>(opts => opts.WithIdentity(jobKey));
+
+    q.AddTrigger(opts => opts
+        .ForJob(jobKey)
+        .WithIdentity("ScheduleStatusJob-Trigger")
+        .WithCronSchedule("0 */5 * * * ?"));
+});
+
+builder.Services.AddQuartzHostedService(options =>
+{
+    options.WaitForJobsToComplete = true;
+});
 
 
 WebApplication app = builder.Build();
