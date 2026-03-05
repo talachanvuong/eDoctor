@@ -143,11 +143,11 @@ public class PaymentService : IPaymentService
 
             await _context.SaveChangesAsync();
 
-            return Result<CreateOrderDto>.Success();
+            return Result.Success();
         }
         catch (ApiException e)
         {
-            return Result<CreateOrderDto>.Failure(e.Message);
+            return Result.Failure(e.Message);
         }
     }
 
