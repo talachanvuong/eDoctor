@@ -20,11 +20,14 @@
             <ul class="list-group list-group-flush">
                 @foreach (var item in Model.PatientHistories)
                 {
-                    <a class="list-group-item list-group-item-action px-4 py-3 d-flex align-items-center gap-3 text-decoration-none text-dark" asp-controller="Patient" asp-action="DetailHistory" asp-route-ScheduleId="@item.ScheduleId">
-                        <div class="bg-primary-subtle rounded-3 p-2 d-flex align-items-center justify-content-center" style="width: 36px; height: 36px; flex-shrink: 0;">
-                            <i class="bi bi-clock text-primary"></i>
+                    <a class="list-group-item list-group-item-action px-4 py-3 d-flex align-items-center justify-content-between text-decoration-none text-dark" asp-controller="Patient" asp-action="DetailHistory" asp-route-ScheduleId="@item.ScheduleId">
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="bg-primary-subtle rounded-3 p-2 d-flex align-items-center justify-content-center" style="width: 36px; height: 36px; flex-shrink: 0;">
+                                <i class="bi bi-clock text-primary"></i>
+                            </div>
+                            <span class="fw-semibold">@item.Time</span>
                         </div>
-                        <span class="fw-semibold">@item.Time</span>
+                        <span class="text-muted small">@item.Doctor</span>
                     </a>
                 }
             </ul>

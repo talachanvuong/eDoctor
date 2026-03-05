@@ -43,7 +43,8 @@ public class PatientController : Controller
         vm.PatientHistories = histories.PatientHistories.Select(h => new PatientHistoryViewModel
         {
             ScheduleId = h.ScheduleId,
-            Time = DateTimeHelper.ConvertToString(h.StartTime, h.EndTime)
+            Time = DateTimeHelper.ConvertToString(h.StartTime, h.EndTime),
+            Doctor = $"{h.RankCode.ConvertToString()} {h.FullName}"
         });
 
         return View(vm);

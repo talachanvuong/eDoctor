@@ -221,7 +221,9 @@ public class ScheduleService : IScheduleService
             {
                 ScheduleId = s.ScheduleId,
                 StartTime = s.StartTime,
-                EndTime = s.EndTime
+                EndTime = s.EndTime,
+                RankCode = s.Doctor.RankCode,
+                FullName = s.Doctor.FullName
             })
             .ToListAsync();
 
