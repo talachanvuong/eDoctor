@@ -1,5 +1,7 @@
 ﻿using eDoctor.Areas.Doctor.Models.Dtos.Schedule;
 using eDoctor.Areas.Doctor.Models.Dtos.Schedule.Queries;
+using eDoctor.Areas.Doctor.Models.Dtos.User;
+using eDoctor.Areas.Doctor.Models.Dtos.User.Queries;
 using eDoctor.Data;
 using eDoctor.Enums;
 using eDoctor.Interfaces;
@@ -203,5 +205,31 @@ public class ScheduleService : IScheduleService
             }).FirstAsync();
 
         return Result<MyDetailScheduleDto>.Success(value);
+    }
+
+    public async Task<Result<PatientHistoriesDto>> GetPatientHistoriesAsync(PatientHistoriesQueryDto dto)
+    {
+        if (!await _context.Users.AnyAsync(u => u.UserId == dto.UserId))
+        {
+            return Result<PatientHistoriesDto>.Failure("User not found.");
+        }
+
+        IEnumerable<PatientHistoryDto> schedules = await _context.Schedules
+            .Where(s => s.UserId == dto.UserId && s.Status == ScheduleStatus.COMPLETED)
+            .OrderByDescending(s => s.StartTime)
+            .Select(s => new PatientHistoryDto
+            {
+                ScheduleId = s.ScheduleId,
+                StartTime = s.StartTime,
+                EndTime = s.EndTime
+            })
+            .ToListAsync();
+
+        PatientHistoriesDto value = new PatientHistoriesDto
+        {
+            PatientHistories = schedules
+        };
+
+        return Result<PatientHistoriesDto>.Success(value);
     }
 }

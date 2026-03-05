@@ -1,5 +1,7 @@
 ﻿using eDoctor.Areas.Doctor.Models.Dtos.Schedule;
 using eDoctor.Areas.Doctor.Models.Dtos.Schedule.Queries;
+using eDoctor.Areas.Doctor.Models.Dtos.User;
+using eDoctor.Areas.Doctor.Models.Dtos.User.Queries;
 using eDoctor.Models.Dtos.Schedule;
 using eDoctor.Models.Dtos.Schedule.Queries;
 using eDoctor.Results;
@@ -19,4 +21,5 @@ public interface IScheduleService
     Task<Result<SchedulesDto>> GetSchedulesAsync(SchedulesQueryDto dto);
     Task<MySchedulesDto> GetMySchedulesAsync(MySchedulesQueryDto dto);
     Task<Result<MyDetailScheduleDto>> GetMyDetailScheduleAsync(MyDetailScheduleQueryDto dto);
+    Task<Result<PatientHistoriesDto>> GetPatientHistoriesAsync(PatientHistoriesQueryDto dto);
 }
