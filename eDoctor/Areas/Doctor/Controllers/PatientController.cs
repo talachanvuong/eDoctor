@@ -44,7 +44,8 @@ public class PatientController : Controller
         {
             ScheduleId = h.ScheduleId,
             Time = DateTimeHelper.ConvertToString(h.StartTime, h.EndTime),
-            Doctor = $"{h.RankCode.ConvertToString()} {h.FullName}"
+            Doctor = $"{h.RankCode.ConvertToString()} {h.FullName}",
+            HasMedicalRecord = h.HasMedicalRecord
         });
 
         return View(vm);

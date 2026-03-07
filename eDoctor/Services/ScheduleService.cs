@@ -225,7 +225,8 @@ public class ScheduleService : IScheduleService
                 StartTime = s.StartTime,
                 EndTime = s.EndTime,
                 RankCode = s.Doctor.RankCode,
-                FullName = s.Doctor.FullName
+                FullName = s.Doctor.FullName,
+                HasMedicalRecord = s.MedicalRecord != null
             })
             .ToListAsync();
 

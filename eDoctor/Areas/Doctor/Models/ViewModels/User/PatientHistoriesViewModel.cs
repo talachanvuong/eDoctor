@@ -11,4 +11,5 @@ public class PatientHistoryViewModel
     public int ScheduleId { get; set; }
     public string Time { get; set; } = null!;
     public string Doctor { get; set; } = null!;
+    public bool HasMedicalRecord { get; set; }
 }

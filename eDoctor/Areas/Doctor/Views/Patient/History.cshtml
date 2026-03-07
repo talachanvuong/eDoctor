@@ -4,6 +4,13 @@
     ViewData["UseContainer"] = true;
 }
 
+<div class="d-flex align-items-center gap-2 mb-3">
+    <a class="btn btn-sm btn-light border rounded-pill" onclick="history.back()">
+        <i class="bi bi-arrow-left me-1"></i>Back
+    </a>
+    <h6 class="mb-0 fw-bold">Patient History</h6>
+</div>
+
 <div class="card border-0 shadow-sm rounded-4">
     <div class="card-header bg-white border-bottom px-4 py-3 rounded-top-4 d-flex align-items-center justify-content-between">
         <h6 class="mb-0 fw-bold text-dark">
@@ -20,15 +27,23 @@
             <ul class="list-group list-group-flush">
                 @foreach (var item in Model.PatientHistories)
                 {
-                    <a class="list-group-item list-group-item-action px-4 py-3 d-flex align-items-center justify-content-between text-decoration-none text-dark" asp-controller="Patient" asp-action="DetailHistory" asp-route-ScheduleId="@item.ScheduleId">
+                    <li class="list-group-item px-4 py-3 d-flex align-items-center justify-content-between">
                         <div class="d-flex align-items-center gap-3">
                             <div class="bg-primary-subtle rounded-3 p-2 d-flex align-items-center justify-content-center" style="width: 36px; height: 36px; flex-shrink: 0;">
                                 <i class="bi bi-clock text-primary"></i>
                             </div>
-                            <span class="fw-semibold">@item.Time</span>
+                            <div>
+                                <div class="fw-semibold">@item.Time</div>
+                                <div class="text-muted small">@item.Doctor</div>
+                            </div>
                         </div>
-                        <span class="text-muted small">@item.Doctor</span>
-                    </a>
+                        @if (item.HasMedicalRecord)
+                        {
+                            <a class="btn btn-sm btn-outline-primary rounded-pill px-3" asp-controller="MedicalRecord" asp-action="Detail" asp-route-ScheduleId="@item.ScheduleId">
+                                <i class="bi bi-file-earmark-medical me-1"></i>View Medical Record
+                            </a>
+                        }
+                    </li>
                 }
             </ul>
         }
