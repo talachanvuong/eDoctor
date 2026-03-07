@@ -71,7 +71,8 @@ public class ScheduleService : IScheduleService
             query = query.Where(s => s.Status == dto.Status);
         }
 
-        IEnumerable<AreaScheduleDto> schedules = await query.OrderByDescending(s => s.StartTime)
+        IEnumerable<AreaScheduleDto> schedules = await query.Where(s => s.DoctorId == dto.DoctorId)
+            .OrderByDescending(s => s.StartTime)
             .Select(s => new AreaScheduleDto
             {
                 ScheduleId = s.ScheduleId,

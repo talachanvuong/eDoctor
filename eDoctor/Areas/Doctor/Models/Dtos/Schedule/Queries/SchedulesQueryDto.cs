@@ -6,4 +6,5 @@ public class SchedulesQueryDto
 {
     public DateTime? Date { get; set; }
     public ScheduleStatus? Status { get; set; }
+    public int DoctorId { get; set; }
 }

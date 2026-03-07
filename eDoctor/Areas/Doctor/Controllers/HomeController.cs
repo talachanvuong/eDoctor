@@ -27,7 +27,8 @@ public class HomeController : Controller
         SchedulesQueryDto dto = new SchedulesQueryDto
         {
             Date = vm.Date,
-            Status = vm.Status
+            Status = vm.Status,
+            DoctorId = User.GetId()
         };
 
         SchedulesDto schedules = await _scheduleService.GetSchedulesAsync(dto);
