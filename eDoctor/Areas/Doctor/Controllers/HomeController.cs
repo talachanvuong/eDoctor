@@ -106,6 +106,7 @@ public class HomeController : Controller
         vm.Time = DateTimeHelper.ConvertToString(detail.StartTime, detail.EndTime);
         vm.Status = detail.Status.ConvertToString();
         vm.Patient = detail.Patient;
+        vm.HasMedicalRecord = detail.HasMedicalRecord;
 
         return View(vm);
     }

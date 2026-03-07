@@ -8,4 +8,5 @@ public class DetailViewModel
     public string Time { get; set; } = null!;
     public string Status { get; set; } = null!;
     public string? Patient { get; set; }
+    public bool HasMedicalRecord { get; set; }
 }

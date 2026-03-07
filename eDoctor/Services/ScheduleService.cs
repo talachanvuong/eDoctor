@@ -104,7 +104,8 @@ public class ScheduleService : IScheduleService
                 StartTime = s.StartTime,
                 EndTime = s.EndTime,
                 Status = s.Status,
-                Patient = s.User != null ? s.User.FullName : null
+                Patient = s.User != null ? s.User.FullName : null,
+                HasMedicalRecord = s.MedicalRecord != null
             }).FirstAsync();
 
         return Result<DetailDto>.Success(value);

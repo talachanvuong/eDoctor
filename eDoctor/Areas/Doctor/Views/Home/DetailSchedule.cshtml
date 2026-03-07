@@ -92,4 +92,22 @@
             </form>
         </div>
     }
+
+    @if (Model.Status == ScheduleStatus.ONGOING.ConvertToString() || Model.Status == ScheduleStatus.COMPLETED.ConvertToString())
+    {
+        <div class="card-footer bg-white border-top px-4 py-3 rounded-bottom-4 d-flex justify-content-end">
+            @if (Model.HasMedicalRecord)
+            {
+                <a class="btn btn-primary rounded-pill" asp-controller="MedicalRecord" asp-action="Detail" asp-route-ScheduleId="@Model.ScheduleId">
+                    <i class="bi bi-file-earmark-medical me-1"></i>View Medical Record
+                </a>
+            }
+            else
+            {
+                <a class="btn btn-primary rounded-pill" asp-controller="MedicalRecord" asp-action="CreateMedicalRecord" asp-route-ScheduleId="@Model.ScheduleId">
+                    <i class="bi bi-file-earmark-medical me-1"></i>Create Medical Record
+                </a>
+            }
+        </div>
+    }
 </div>

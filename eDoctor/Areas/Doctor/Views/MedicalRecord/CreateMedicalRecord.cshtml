@@ -1,0 +1,101 @@
+﻿@model CreateMedicalRecordViewModel
+
+@{
+    ViewData["UseContainer"] = true;
+}
+
+<div class="d-flex align-items-center gap-2 mb-3">
+    <a class="btn btn-sm btn-light border rounded-pill" onclick="history.back()">
+        <i class="bi bi-arrow-left me-1"></i>Back
+    </a>
+    <h6 class="mb-0 fw-bold">Create Medical Record</h6>
+</div>
+
+<form method="post" asp-controller="MedicalRecord" asp-action="Create">
+    <input type="hidden" asp-for="ScheduleId" />
+
+    <div class="alert alert-danger rounded-3" asp-validation-summary="All"></div>
+
+    <div class="card border-0 shadow-sm rounded-4">
+        <div class="card-header bg-white border-bottom px-4 py-3 rounded-top-4">
+            <h6 class="mb-0 fw-bold text-dark">
+                <i class="bi bi-file-earmark-medical me-2 text-primary"></i>Medical Record
+            </h6>
+        </div>
+        <div class="card-body px-4 py-3 d-flex flex-column gap-3">
+            <div>
+                <label class="form-label fw-semibold small" asp-for="Symptom"></label>
+                <input class="form-control rounded-3" asp-for="Symptom" />
+            </div>
+            <div>
+                <label class="form-label fw-semibold small" asp-for="Diagnosis"></label>
+                <input class="form-control rounded-3" asp-for="Diagnosis" />
+            </div>
+            <div>
+                <label class="form-label fw-semibold small" asp-for="Advice"></label>
+                <input class="form-control rounded-3" asp-for="Advice" />
+            </div>
+        </div>
+    </div>
+
+    <div class="card border-0 shadow-sm rounded-4 mt-3">
+        <div class="card-header bg-white border-bottom px-4 py-3 rounded-top-4 d-flex align-items-center justify-content-between">
+            <h6 class="mb-0 fw-bold text-dark">
+                <i class="bi bi-capsule me-2 text-primary"></i>Prescription
+            </h6>
+            <button class="btn btn-sm btn-primary rounded-pill px-3" type="button" onclick="addDrug()">
+                <i class="bi bi-plus me-1"></i>Add
+            </button>
+        </div>
+        <div class="card-body px-4 py-3">
+            <div id="prescription-list" class="d-flex flex-column gap-3"></div>
+        </div>
+    </div>
+
+    <div class="d-flex justify-content-end mt-3">
+        <button class="btn btn-primary rounded-pill px-4" type="submit">
+            <i class="bi bi-check-lg me-1"></i>Save
+        </button>
+    </div>
+</form>
+
+<template id="drug-template">
+    <div class="border rounded-3 p-3 position-relative drug-item">
+        <button class="btn btn-sm btn-link text-danger text-decoration-none position-absolute top-0 end-0 p-2" type="button" onclick="removeDrug(this)">
+            <i class="bi bi-x-lg"></i>
+        </button>
+        <div class="d-flex flex-column gap-2">
+            <div>
+                <label class="form-label fw-semibold small">Drug name</label>
+                <input class="form-control rounded-3" />
+            </div>
+            <div>
+                <label class="form-label fw-semibold small">Quantity</label>
+                <input class="form-control rounded-3" type="number" min="1" max="100" value="1" />
+            </div>
+            <div>
+                <label class="form-label fw-semibold small">Note (Optional)</label>
+                <input class="form-control rounded-3" />
+            </div>
+        </div>
+    </div>
+</template>
+
+<script>
+    let index = 0;
+
+    const addDrug = () => {
+        const i = index++;
+        const clone = document.getElementById("drug-template").content.cloneNode(true);
+        const item = clone.querySelector(".drug-item");
+        const [drugName, quantity, note] = item.querySelectorAll("input");
+        drugName.name = `Prescription[${i}].DrugName`;
+        quantity.name = `Prescription[${i}].Quantity`;
+        note.name = `Prescription[${i}].Note`;
+        document.getElementById("prescription-list").appendChild(clone);
+    };
+
+    const removeDrug = (btn) => btn.closest(".drug-item").remove();
+
+    addDrug();
+</script>

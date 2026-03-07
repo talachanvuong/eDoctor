@@ -76,6 +76,7 @@ builder.Services.AddScoped<IDoctorService, DoctorService>();
 builder.Services.AddScoped<IScheduleService, ScheduleService>();
 builder.Services.AddScoped<IPaymentService, PaymentService>();
 builder.Services.AddScoped<IMeetingService, MeetingService>();
+builder.Services.AddScoped<IMedicalRecordService, MedicalRecordService>();
 
 // PayPal
 string? paypalClientId = builder.Configuration["PayPal:OAuthClientId"];

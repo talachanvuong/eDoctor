@@ -10,4 +10,5 @@ public class DetailDto
     public DateTime EndTime { get; set; }
     public ScheduleStatus Status { get; set; }
     public string? Patient { get; set; }
+    public bool HasMedicalRecord { get; set; }
 }
