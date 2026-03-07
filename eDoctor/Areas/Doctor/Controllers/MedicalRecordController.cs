@@ -72,7 +72,8 @@ public class MedicalRecordController : Controller
     {
         MedicalRecordQueryDto dto = new MedicalRecordQueryDto
         {
-            ScheduleId = vm.ScheduleId
+            ScheduleId = vm.ScheduleId,
+            DoctorId = User.GetId()
         };
 
         Result<MedicalRecordDto> result = await _medicalRecordService.GetDoctorMedicalRecordAsync(dto);

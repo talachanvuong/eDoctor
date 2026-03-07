@@ -3,4 +3,5 @@
 public class PatientHistoriesQueryDto
 {
     public int UserId { get; set; }
+    public int DoctorId { get; set; }
 }

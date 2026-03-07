@@ -26,7 +26,8 @@ public class PatientController : Controller
     {
         PatientHistoriesQueryDto dto = new PatientHistoriesQueryDto
         {
-            UserId = vm.UserId
+            UserId = vm.UserId,
+            DoctorId = User.GetId()
         };
 
         Result<PatientHistoriesDto> result = await _scheduleService.GetPatientHistoriesAsync(dto);

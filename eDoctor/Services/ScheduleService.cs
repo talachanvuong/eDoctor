@@ -211,9 +211,9 @@ public class ScheduleService : IScheduleService
 
     public async Task<Result<PatientHistoriesDto>> GetPatientHistoriesAsync(PatientHistoriesQueryDto dto)
     {
-        if (!await _context.Users.AnyAsync(u => u.UserId == dto.UserId))
+        if (!await _context.Schedules.AnyAsync(s => s.DoctorId == dto.DoctorId && s.UserId == dto.UserId))
         {
-            return Result<PatientHistoriesDto>.Failure("User not found.");
+            return Result<PatientHistoriesDto>.Failure("You haven't had an appointment with this patient.");
         }
 
         IEnumerable<PatientHistoryDto> schedules = await _context.Schedules
