@@ -1,4 +1,5 @@
-﻿using eDoctor.Areas.Doctor.Models.Dtos.MedicalRecord.Queries;
+﻿using eDoctor.Areas.Doctor.Models.Dtos.MedicalRecord;
+using eDoctor.Areas.Doctor.Models.Dtos.MedicalRecord.Queries;
 using eDoctor.Data;
 using eDoctor.Enums;
 using eDoctor.Interfaces;
@@ -11,10 +12,12 @@ namespace eDoctor.Services;
 public class MedicalRecordService : IMedicalRecordService
 {
     private readonly ApplicationDbContext _context;
+    private readonly IPdfService _pdfService;
 
-    public MedicalRecordService(ApplicationDbContext context)
+    public MedicalRecordService(ApplicationDbContext context, IPdfService pdfService)
     {
         _context = context;
+        _pdfService = pdfService;
     }
 
     public async Task<Result> AddAsync(CreateMedicalRecordQueryDto dto)
@@ -63,5 +66,42 @@ public class MedicalRecordService : IMedicalRecordService
         await _context.SaveChangesAsync();
 
         return Result.Success();
+    }
+
+    public async Task<Result<MedicalRecordDto>> GetDoctorMedicalRecordAsync(MedicalRecordQueryDto dto)
+    {
+        if (!await _context.MedicalRecords.AnyAsync(m => m.ScheduleId == dto.ScheduleId))
+        {
+            return Result<MedicalRecordDto>.Failure("Medical record not found.");
+        }
+
+        DetailMedicalRecordDto detailMedicalRecord = await _context.MedicalRecords
+            .Where(dmr => dmr.ScheduleId == dto.ScheduleId)
+            .Select(dmr => new DetailMedicalRecordDto
+            {
+                MedicalRecordId = dmr.MedicalRecordId,
+                Symptom = dmr.Symptom,
+                Diagnosis = dmr.Diagnosis,
+                Advice = dmr.Advice,
+                Prescription = dmr.DetailPrescriptions.Select(dp => new DetailPrescriptionDto
+                {
+                    DrugName = dp.DrugName,
+                    Quantity = dp.Quantity,
+                    Note = dp.Note
+                }),
+                PatientFullName = dmr.Schedule.User!.FullName,
+                BirthDate = dmr.Schedule.User.BirthDate,
+                Sex = dmr.Schedule.User.Sex,
+                DoctorFullName = dmr.Schedule.Doctor.FullName,
+                RankCode = dmr.Schedule.Doctor.RankCode
+            })
+            .FirstAsync();
+
+        MedicalRecordDto value = new MedicalRecordDto
+        {
+            Pdf = _pdfService.GenerateMedicalRecord(detailMedicalRecord)
+        };
+
+        return Result<MedicalRecordDto>.Success(value);
     }
 }

@@ -1,4 +1,5 @@
-﻿using eDoctor.Areas.Doctor.Models.Dtos.MedicalRecord.Queries;
+﻿using eDoctor.Areas.Doctor.Models.Dtos.MedicalRecord;
+using eDoctor.Areas.Doctor.Models.Dtos.MedicalRecord.Queries;
 using eDoctor.Areas.Doctor.Models.ViewModels.MedicalRecord;
 using eDoctor.Helpers;
 using eDoctor.Helpers.ExtensionMethods;
@@ -63,5 +64,28 @@ public class MedicalRecordController : Controller
         TempData.SetAlert("Create medical record successfully!", AlertTypes.Success);
 
         return RedirectToAction("DetailSchedule", "Home", new { vm.ScheduleId });
+    }
+
+    [HttpGet]
+    [Authorize(Roles = RoleTypes.Doctor)]
+    public async Task<IActionResult> Detail(MedicalRecordViewModel vm)
+    {
+        MedicalRecordQueryDto dto = new MedicalRecordQueryDto
+        {
+            ScheduleId = vm.ScheduleId
+        };
+
+        Result<MedicalRecordDto> result = await _medicalRecordService.GetDoctorMedicalRecordAsync(dto);
+
+        if (!result.IsSuccess)
+        {
+            TempData.SetAlert(result.Error!, AlertTypes.Danger);
+
+            return RedirectToAction("Index", "Home");
+        }
+
+        MedicalRecordDto medicalRecord = result.Value!;
+
+        return File(medicalRecord.Pdf, "application/pdf");
     }
 }
