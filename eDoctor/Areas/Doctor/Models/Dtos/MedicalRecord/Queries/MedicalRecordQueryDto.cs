@@ -3,5 +3,5 @@
 public class MedicalRecordQueryDto
 {
     public int ScheduleId { get; set; }
-    public int DoctorId { get; set; }
+    public int Id { get; set; }
 }

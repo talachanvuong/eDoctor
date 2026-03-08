@@ -203,7 +203,8 @@ public class ScheduleService : IScheduleService
                 EndTime = s.EndTime,
                 Status = s.Status,
                 RankCode = s.Doctor.RankCode,
-                FullName = s.Doctor.FullName
+                FullName = s.Doctor.FullName,
+                HasMedicalRecord = s.MedicalRecord != null
             }).FirstAsync();
 
         return Result<MyDetailScheduleDto>.Success(value);

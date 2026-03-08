@@ -1,6 +1,5 @@
 ﻿using eDoctor.Areas.Doctor.Models.Dtos.MedicalRecord;
 using eDoctor.Areas.Doctor.Models.Dtos.MedicalRecord.Queries;
-using eDoctor.Areas.Doctor.Models.Dtos.User;
 using eDoctor.Data;
 using eDoctor.Enums;
 using eDoctor.Interfaces;
@@ -78,9 +77,51 @@ public class MedicalRecordService : IMedicalRecordService
 
         var schedule = await _context.Schedules.FirstAsync(s => s.ScheduleId == dto.ScheduleId);
 
-        if (!await _context.Schedules.AnyAsync(s => s.DoctorId == dto.DoctorId && s.UserId == schedule.UserId))
+        if (!await _context.Schedules.AnyAsync(s => s.DoctorId == dto.Id && s.UserId == schedule.UserId))
         {
             return Result<MedicalRecordDto>.Failure("You haven't had an appointment with this patient.");
+        }
+
+        DetailMedicalRecordDto detailMedicalRecord = await _context.MedicalRecords
+            .Where(dmr => dmr.ScheduleId == dto.ScheduleId)
+            .Select(dmr => new DetailMedicalRecordDto
+            {
+                MedicalRecordId = dmr.MedicalRecordId,
+                Symptom = dmr.Symptom,
+                Diagnosis = dmr.Diagnosis,
+                Advice = dmr.Advice,
+                Prescription = dmr.DetailPrescriptions.Select(dp => new DetailPrescriptionDto
+                {
+                    DrugName = dp.DrugName,
+                    Quantity = dp.Quantity,
+                    Note = dp.Note
+                }),
+                PatientFullName = dmr.Schedule.User!.FullName,
+                BirthDate = dmr.Schedule.User.BirthDate,
+                Sex = dmr.Schedule.User.Sex,
+                DoctorFullName = dmr.Schedule.Doctor.FullName,
+                RankCode = dmr.Schedule.Doctor.RankCode
+            })
+            .FirstAsync();
+
+        MedicalRecordDto value = new MedicalRecordDto
+        {
+            Pdf = _pdfService.GenerateMedicalRecord(detailMedicalRecord)
+        };
+
+        return Result<MedicalRecordDto>.Success(value);
+    }
+
+    public async Task<Result<MedicalRecordDto>> GetUserMedicalRecordAsync(MedicalRecordQueryDto dto)
+    {
+        if (!await _context.MedicalRecords.AnyAsync(m => m.ScheduleId == dto.ScheduleId))
+        {
+            return Result<MedicalRecordDto>.Failure("Medical record not found.");
+        }
+
+        if (!await _context.Schedules.AnyAsync(s => s.ScheduleId == dto.ScheduleId && s.UserId == dto.Id))
+        {
+            return Result<MedicalRecordDto>.Failure("You are not allowed to access this appointment.");
         }
 
         DetailMedicalRecordDto detailMedicalRecord = await _context.MedicalRecords

@@ -96,6 +96,7 @@ public class ScheduleController : Controller
         vm.Time = DateTimeHelper.ConvertToString(detail.StartTime, detail.EndTime);
         vm.Status = detail.Status.ConvertToString();
         vm.Doctor = $"{detail.RankCode.ConvertToString()} {detail.FullName}";
+        vm.HasMedicalRecord = detail.HasMedicalRecord;
 
         return View(vm);
     }

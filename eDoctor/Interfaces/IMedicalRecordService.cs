@@ -8,4 +8,5 @@ public interface IMedicalRecordService
 {
     Task<Result> AddAsync(CreateMedicalRecordQueryDto dto);
     Task<Result<MedicalRecordDto>> GetDoctorMedicalRecordAsync(MedicalRecordQueryDto dto);
+    Task<Result<MedicalRecordDto>> GetUserMedicalRecordAsync(MedicalRecordQueryDto dto);
 }

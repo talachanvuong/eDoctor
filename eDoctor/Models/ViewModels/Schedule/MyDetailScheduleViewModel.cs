@@ -7,4 +7,5 @@ public class MyDetailScheduleViewModel
     public string Time { get; set; } = null!;
     public string Status { get; set; } = null!;
     public string Doctor { get; set; } = null!;
+    public bool HasMedicalRecord { get; set; }
 }
