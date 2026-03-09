@@ -20,6 +20,7 @@ public class ApplicationDbContext : DbContext
     public DbSet<DetailInvoice> DetailInvoices { get; set; }
     public DbSet<Invoice> Invoices { get; set; }
     public DbSet<Schedule> Schedules { get; set; }
+    public DbSet<Notification> Notifications { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
