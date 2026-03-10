@@ -77,6 +77,7 @@ builder.Services.AddScoped<IScheduleService, ScheduleService>();
 builder.Services.AddScoped<IPaymentService, PaymentService>();
 builder.Services.AddScoped<IMeetingService, MeetingService>();
 builder.Services.AddScoped<IMedicalRecordService, MedicalRecordService>();
+builder.Services.AddScoped<INotificationService, NotificationService>();
 
 // PayPal
 string? paypalClientId = builder.Configuration["PayPal:OAuthClientId"];
@@ -145,5 +146,6 @@ app.MapControllerRoute(
     .WithStaticAssets();
 
 app.MapHub<MeetingHub>("/MeetingHub");
+app.MapHub<NotificationHub>("/NotificationHub");
 
 app.Run();

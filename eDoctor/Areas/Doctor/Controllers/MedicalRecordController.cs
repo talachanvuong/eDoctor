@@ -1,9 +1,11 @@
 ﻿using eDoctor.Areas.Doctor.Models.Dtos.MedicalRecord;
 using eDoctor.Areas.Doctor.Models.Dtos.MedicalRecord.Queries;
 using eDoctor.Areas.Doctor.Models.ViewModels.MedicalRecord;
+using eDoctor.Enums;
 using eDoctor.Helpers;
 using eDoctor.Helpers.ExtensionMethods;
 using eDoctor.Interfaces;
+using eDoctor.Models.Dtos.Notification.Queries;
 using eDoctor.Results;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -14,10 +16,12 @@ namespace eDoctor.Areas.Doctor.Controllers;
 public class MedicalRecordController : Controller
 {
     private readonly IMedicalRecordService _medicalRecordService;
+    private readonly INotificationService _notificationService;
 
-    public MedicalRecordController(IMedicalRecordService medicalRecordService)
+    public MedicalRecordController(IMedicalRecordService medicalRecordService, INotificationService notificationService)
     {
         _medicalRecordService = medicalRecordService;
+        _notificationService = notificationService;
     }
 
     [HttpGet]
@@ -60,6 +64,13 @@ public class MedicalRecordController : Controller
 
             return RedirectToAction("Index", "Home");
         }
+
+        await _notificationService.SendAsync(new SendQueryDto
+        {
+            ScheduleId = vm.ScheduleId,
+            NotificationType = NotificationType.CREATE_MEDICAL_RECORD,
+            Reference = $"/MedicalRecord/Detail?ScheduleId={vm.ScheduleId}"
+        });
 
         TempData.SetAlert("Create medical record successfully!", AlertTypes.Success);
 

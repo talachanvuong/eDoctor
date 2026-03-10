@@ -1,6 +1,8 @@
-﻿using eDoctor.Helpers;
+﻿using eDoctor.Enums;
+using eDoctor.Helpers;
 using eDoctor.Helpers.ExtensionMethods;
 using eDoctor.Interfaces;
+using eDoctor.Models.Dtos.Notification.Queries;
 using eDoctor.Models.Dtos.Payment;
 using eDoctor.Models.Dtos.Payment.Queries;
 using eDoctor.Models.ViewModels.Payment;
@@ -14,11 +16,13 @@ public class PaymentController : Controller
 {
     private readonly IPaymentService _paymentService;
     private readonly IConfiguration _configuration;
+    private readonly INotificationService _notificationService;
 
-    public PaymentController(IPaymentService paymentService, IConfiguration configuration)
+    public PaymentController(IPaymentService paymentService, IConfiguration configuration, INotificationService notificationService)
     {
         _paymentService = paymentService;
         _configuration = configuration;
+        _notificationService = notificationService;
     }
 
     [HttpGet]
@@ -106,6 +110,13 @@ public class PaymentController : Controller
                 message = result.Error
             });
         }
+
+        await _notificationService.SendAsync(new SendQueryDto
+        {
+            ScheduleId = vm.ScheduleId,
+            NotificationType = NotificationType.BOOK_SCHEDULE,
+            Reference = $"/Doctor/Home/DetailSchedule?ScheduleId={vm.ScheduleId}"
+        });
 
         return Ok();
     }

@@ -1,8 +1,13 @@
-﻿<li class="nav-item">
-    <a class="btn btn-outline-primary me-2">
+﻿<li class="nav-item dropdown">
+    <button class="btn btn-outline-primary me-2" data-bs-toggle="dropdown" data-bs-auto-close="outside" id="notification-btn">
         <i class="bi bi-bell-fill"></i>
-        99
-    </a>
+        <span id="notification-count" class="d-none"></span>
+    </button>
+    <ul class="dropdown-menu dropdown-menu-end p-2" style="width:320px; max-height:400px; overflow-y:auto;" id="notification-list">
+        <li class="text-center text-muted small py-2" id="notification-empty">
+            No notifications
+        </li>
+    </ul>
 </li>
 <li class="nav-item dropdown">
     <button class="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown">
@@ -29,6 +34,12 @@
 
 <form id="logout-form" method="post" asp-controller="Account" asp-action="Logout"></form>
 
+<form id="is-read-antiForgeryForm">
+    @Html.AntiForgeryToken()
+</form>
+
+<script src="~/lib/microsoft-signalr/signalr.min.js"></script>
+
 <script>
     const logout = () => {
         const logoutForm = document.getElementById('logout-form')
@@ -39,4 +50,127 @@
 
         logoutForm.submit()
     }
+
+    const isReadToken = document.querySelector('#is-read-antiForgeryForm input[name="__RequestVerificationToken"]').value;
+
+    const notificationList = document.getElementById("notification-list")
+    const notificationEmpty = document.getElementById("notification-empty")
+    const notificationCount = document.getElementById("notification-count")
+
+    let unread = 0
+
+    const updateBadge = () => {
+        if (unread > 0) {
+            notificationCount.classList.remove("d-none")
+            notificationCount.innerText = `${unread}`
+        } else {
+            notificationCount.classList.add("d-none")
+        }
+    }
+
+    const formatTime = (date) => {
+        return new Date(date).toLocaleTimeString("en-US", {
+            year: "numeric",
+            month: "2-digit",
+            day: "2-digit",
+            hour: "2-digit",
+            minute: "2-digit",
+            hour12: false
+        })
+    }
+
+    const createNotificationItem = (n) => {
+        const li = document.createElement("li")
+
+        li.className = "border-bottom py-2"
+
+        li.innerHTML = `
+            <div class="small">${n.content}</div>
+            <div class="d-flex justify-content-between align-items-center mt-1">
+                <small class="text-muted">${formatTime(n.createdAt)}</small>
+                ${!n.isRead ? `<button class="btn btn-sm btn-link p-0 mark-read">Mark as read</button>` : ``}
+            </div>
+        `
+
+        if (n.reference) {
+            li.style.cursor = "pointer"
+            li.onclick = () => {
+                window.location.href = n.reference
+            }
+        }
+
+        const btn = li.querySelector(".mark-read")
+
+        if (btn) {
+            btn.onclick = async (e) => {
+                e.stopPropagation()
+
+                const res = await fetch("/Notification/Read", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "RequestVerificationToken": isReadToken
+                    },
+                    credentials: "include",
+                    body: JSON.stringify({
+                        notificationId: n.notificationId
+                    })
+                })
+
+                if (!res.ok) {
+                    const data = await res.json()
+                    alert(data.message)
+                    return
+                }
+
+                btn.remove()
+                unread--
+                updateBadge()
+            }
+        }
+
+        return li
+    }
+
+    const loadNotifications = async () => {
+        const res = await fetch("/Notification/GetMyNotifications")
+        const json = await res.json()
+        const data = json.data.notifications
+
+        if (data.length === 0) return
+
+        notificationEmpty.remove()
+
+        data.forEach(n => {
+            if (!n.isRead) unread++
+
+            const item = createNotificationItem(n)
+
+            notificationList.appendChild(item)
+        })
+
+        updateBadge()
+    }
+
+    loadNotifications()
+
+    const connection = new signalR.HubConnectionBuilder()
+        .withUrl("/NotificationHub")
+        .withAutomaticReconnect()
+        .build()
+
+    connection.on("ReceiveNotification", (n) => {
+        const empty = document.getElementById("notification-empty")
+
+        if (empty) empty.remove()
+
+        unread++
+        updateBadge()
+
+        const item = createNotificationItem(n)
+
+        notificationList.prepend(item)
+    })
+
+    connection.start()
 </script>
