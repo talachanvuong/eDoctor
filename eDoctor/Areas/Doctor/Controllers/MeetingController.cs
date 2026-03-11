@@ -13,10 +13,12 @@ namespace eDoctor.Areas.Doctor.Controllers;
 public class MeetingController : Controller
 {
     private readonly IMeetingService _meetingService;
+    private readonly IConfiguration _configuration;
 
-    public MeetingController(IMeetingService meetingService)
+    public MeetingController(IMeetingService meetingService, IConfiguration configuration)
     {
         _meetingService = meetingService;
+        _configuration = configuration;
     }
 
     [HttpGet]
@@ -38,6 +40,9 @@ public class MeetingController : Controller
 
             return RedirectToAction("Index", "Home");
         }
+
+        ViewBag.Username = _configuration["Metered:Username"];
+        ViewBag.Password = _configuration["Metered:Password"];
 
         return View(vm);
     }

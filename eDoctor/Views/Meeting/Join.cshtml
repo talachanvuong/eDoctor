@@ -134,8 +134,35 @@
 
             peer = new SimplePeer({
                 initiator: isInitiator,
-                trickle: false,
-                stream: localStream
+                trickle: true,
+                stream: localStream,
+                config: {
+                    iceServers: [
+                        {
+                            urls: "stun:stun.relay.metered.ca:80"
+                        },
+                        {
+                            urls: "turn:global.relay.metered.ca:80",
+                            username: "@ViewBag.Username",
+                            credential: "@ViewBag.Password"
+                        },
+                        {
+                            urls: "turn:global.relay.metered.ca:80?transport=tcp",
+                            username: "@ViewBag.Username",
+                            credential: "@ViewBag.Password"
+                        },
+                        {
+                            urls: "turn:global.relay.metered.ca:443",
+                            username: "@ViewBag.Username",
+                            credential: "@ViewBag.Password"
+                        },
+                        {
+                            urls: "turns:global.relay.metered.ca:443?transport=tcp",
+                            username: "@ViewBag.Username",
+                            credential: "@ViewBag.Password"
+                        }
+                    ]
+                }
             });
 
             peer.on('signal', data => {
@@ -144,21 +171,20 @@
 
             peer.on('stream', stream => {
                 document.getElementById('remoteVideo').srcObject = stream;
-                setRemoteState('cam_on');
+
+                const videoTrack = stream.getVideoTracks()[0];
+                setRemoteState(videoTrack?.enabled ? 'cam_on' : 'cam_off');
             });
 
             peer.on('connect', () => {
                 connected = true;
+                conn.invoke('CameraStateChanged', ROOM, camOn);
             });
 
             peer.on('close', () => {
                 connected = false;
                 setRemoteState('waiting');
                 peer = null;
-            });
-
-            peer.on('error', err => {
-                showError(err.message);
             });
 
             peer._pc.oniceconnectionstatechange = () => {
