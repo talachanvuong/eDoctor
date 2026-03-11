@@ -10,8 +10,15 @@ using PaypalServerSdk.Standard;
 using PaypalServerSdk.Standard.Authentication;
 using Quartz;
 using QuestPDF.Infrastructure;
+using System.Globalization;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
+
+// Culture
+CultureInfo culture = new CultureInfo("en-US");
+
+CultureInfo.DefaultThreadCurrentCulture = culture;
+CultureInfo.DefaultThreadCurrentUICulture = culture;
 
 // License
 QuestPDF.Settings.License = LicenseType.Community;
