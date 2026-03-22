@@ -1,0 +1,273 @@
+@{
+    ViewData["UseContainer"] = true;
+}
+
+<div class="row justify-content-center">
+    <div class="col-7">
+        <div class="text-center mb-4">
+            <h4 class="fw-semibold">AI Medical Assistant</h4>
+            <p class="text-muted small">Press the mic button and ask your question</p>
+        </div>
+
+        <div class="text-center mb-3">
+            <button id="btnMic" class="btn btn-primary btn-lg rounded-circle" style="width: 72px; height: 72px;">
+                <i class="bi bi-mic-fill fs-4"></i>
+            </button>
+            <div class="mt-2">
+                <span id="statusLabel" class="badge bg-secondary">Press to start</span>
+            </div>
+        </div>
+
+        <div id="errorAlert" class="alert alert-danger d-none">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+            <span id="errorText"></span>
+            <button type="button" class="btn-close float-end" id="btnCloseError"></button>
+        </div>
+
+        <div class="card mb-3">
+            <div class="card-header d-flex align-items-center gap-2">
+                <i class="bi bi-person-fill text-primary"></i>
+                <span class="small fw-semibold">You</span>
+            </div>
+            <div class="card-body">
+                <p id="transcriptText" class="mb-0 text-muted fst-italic">Nothing yet...</p>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header d-flex align-items-center gap-2">
+                <i class="bi bi-robot text-success"></i>
+                <span class="small fw-semibold">Assistant</span>
+                <div id="thinkingSpinner" class="spinner-border spinner-border-sm text-success ms-auto d-none"></div>
+            </div>
+            <div class="card-body">
+                <p id="responseText" class="mb-0 text-muted fst-italic">Waiting for your question...</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    (async () => {
+        const WS_URL = '@ViewBag.WebSocketServer'
+
+        const btnMic = document.getElementById('btnMic')
+        const statusLabel = document.getElementById('statusLabel')
+        const errorAlert = document.getElementById('errorAlert')
+        const errorText = document.getElementById('errorText')
+        const transcriptText = document.getElementById('transcriptText')
+        const responseText = document.getElementById('responseText')
+        const thinkingSpinner = document.getElementById('thinkingSpinner')
+        const btnCloseError = document.getElementById('btnCloseError')
+
+        function setStatus(text, cls) {
+            statusLabel.textContent = text
+            statusLabel.className = `badge ${cls}`
+        }
+
+        function showError(msg) {
+            errorText.textContent = msg
+            errorAlert.classList.remove('d-none')
+        }
+
+        btnCloseError.addEventListener('click', () => errorAlert.classList.add('d-none'))
+
+        let pendingResult = false
+        let skipResults = 0
+
+        let audioCtx, workletNode, sourceNode, mediaStream
+
+        const PCM_PROCESSOR = `
+            class PCMProcessor extends AudioWorkletProcessor {
+                process(inputs) {
+                    const ch = inputs[0]?.[0]
+                    if (ch?.length) {
+                        const pcm = new Int16Array(ch.length)
+                        for (let i = 0; i < ch.length; i++) {
+                            pcm[i] = Math.max(-32768, Math.min(32767, ch[i] * 32767))
+                        }
+                        this.port.postMessage(pcm.buffer, [pcm.buffer])
+                    }
+                    return true
+                }
+            }
+            registerProcessor('pcm-processor', PCMProcessor)
+        `
+
+        async function startCapture(ws) {
+            mediaStream = await navigator.mediaDevices.getUserMedia({
+                audio: { echoCancellation: true, noiseSuppression: true, channelCount: 1 }
+            })
+
+            audioCtx = new AudioContext({ sampleRate: 16000, latencyHint: 'interactive' })
+
+            const blob = new Blob([PCM_PROCESSOR], { type: 'application/javascript' })
+            const url = URL.createObjectURL(blob)
+            await audioCtx.audioWorklet.addModule(url)
+            URL.revokeObjectURL(url)
+
+            workletNode = new AudioWorkletNode(audioCtx, 'pcm-processor')
+            sourceNode = audioCtx.createMediaStreamSource(mediaStream)
+            sourceNode.connect(workletNode)
+
+            workletNode.port.onmessage = ({ data }) => {
+                if (ws.readyState === WebSocket.OPEN) ws.send(data)
+            }
+        }
+
+        function stopCapture() {
+            workletNode?.disconnect()
+            sourceNode?.disconnect()
+            mediaStream?.getTracks().forEach(t => t.stop())
+            audioCtx?.close()
+            audioCtx = workletNode = sourceNode = mediaStream = null
+        }
+
+        class StreamingPlayer {
+            constructor() {
+                this._el = new Audio()
+                this._el.autoplay = true
+                this._queue = []
+                this._sb = null
+                this._init()
+            }
+
+            _init() {
+                this._queue = []
+                this._sb = null
+
+                if (this._el.src) URL.revokeObjectURL(this._el.src)
+
+                const ms = new MediaSource()
+                this._el.src = URL.createObjectURL(ms)
+
+                ms.addEventListener('sourceopen', () => {
+                    this._sb = ms.addSourceBuffer('audio/mpeg')
+                    this._sb.mode = 'sequence'
+                    this._sb.addEventListener('updateend', () => this._flush())
+                    this._flush()
+                }, { once: true })
+
+                this._el.play().catch(() => {})
+            }
+
+            _flush() {
+                if (!this._sb || this._sb.updating || !this._queue.length) return
+                try {
+                    const played = this._el.currentTime
+                    if (played > 1 && this._sb.buffered.length > 0) {
+                        const start = this._sb.buffered.start(0)
+                        if (played - start > 1) {
+                            this._sb.remove(start, played - 0.5)
+                            return
+                        }
+                    }
+                    this._sb.appendBuffer(this._queue.shift())
+                } catch {
+                    this._queue = []
+                }
+            }
+
+            push(chunk) {
+                this._queue.push(chunk)
+                this._flush()
+            }
+
+            reset() { this._init() }
+        }
+
+        const player = new StreamingPlayer()
+
+        let ws = null
+
+        function connect() {
+            setStatus('Connecting...', 'bg-warning text-dark')
+            btnMic.disabled = true
+
+            ws = new WebSocket(WS_URL)
+            ws.binaryType = 'arraybuffer'
+
+            ws.onopen = async () => {
+                try {
+                    await startCapture(ws)
+                    setStatus('Listening', 'bg-success')
+                    btnMic.disabled = false
+                    btnMic.classList.replace('btn-primary', 'btn-danger')
+                    btnMic.innerHTML = '<i class="bi bi-stop-fill fs-4"></i>'
+                } catch (err) {
+                    showError('Microphone access denied: ' + err.message)
+                    setStatus('Error', 'bg-danger')
+                    btnMic.disabled = false
+                    ws.close()
+                }
+            }
+
+            ws.onmessage = ({ data }) => {
+                if (data instanceof ArrayBuffer) {
+                    player.push(data)
+                    return
+                }
+
+                const msg = JSON.parse(data)
+
+                if (msg.type === 'transcript') {
+                    if (pendingResult) skipResults++
+                    pendingResult = true
+                    player.reset()
+                    transcriptText.textContent = msg.data
+                    transcriptText.classList.remove('text-muted', 'fst-italic')
+                    responseText.textContent = 'Processing...'
+                    responseText.classList.add('text-muted', 'fst-italic')
+                    thinkingSpinner.classList.remove('d-none')
+                    setStatus('Processing', 'bg-primary')
+                }
+
+                if (msg.type === 'result') {
+                    if (skipResults > 0) { skipResults--; return }
+                    pendingResult = false
+                    responseText.textContent = msg.data
+                    responseText.classList.remove('text-muted', 'fst-italic')
+                    thinkingSpinner.classList.add('d-none')
+                    setStatus('Listening', 'bg-success')
+                }
+
+                if (msg.type === 'error') {
+                    showError(msg.message)
+                    thinkingSpinner.classList.add('d-none')
+                    setStatus('Listening', 'bg-success')
+                }
+            }
+
+            ws.onerror = () => {
+                showError('WebSocket connection lost.')
+            }
+
+            ws.onclose = () => {
+                stopCapture()
+                setStatus('Press to start', 'bg-secondary')
+                btnMic.disabled = false
+                btnMic.classList.replace('btn-danger', 'btn-primary')
+                btnMic.innerHTML = '<i class="bi bi-mic-fill fs-4"></i>'
+                thinkingSpinner.classList.add('d-none')
+            }
+        }
+
+        function disconnect() {
+            stopCapture()
+            player.reset()
+            responseText.textContent = 'Waiting for your question...'
+            responseText.classList.add('text-muted', 'fst-italic')
+            thinkingSpinner.classList.add('d-none')
+            ws?.close(1000)
+            ws = null
+        }
+
+        btnMic.addEventListener('click', () => {
+            if (!ws || ws.readyState === WebSocket.CLOSED) {
+                connect()
+            } else {
+                disconnect()
+            }
+        })
+    })()
+</script>

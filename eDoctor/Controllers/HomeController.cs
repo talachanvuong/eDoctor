@@ -12,10 +12,12 @@ namespace eDoctor.Controllers;
 public class HomeController : Controller
 {
     private readonly IDoctorService _doctorService;
+    private readonly IConfiguration _configuration;
 
-    public HomeController(IDoctorService doctorService)
+    public HomeController(IDoctorService doctorService, IConfiguration configuration)
     {
         _doctorService = doctorService;
+        _configuration = configuration;
     }
 
     [HttpGet]
@@ -103,5 +105,13 @@ public class HomeController : Controller
         });
 
         return View(vm);
+    }
+
+    [HttpGet]
+    public IActionResult Assistant()
+    {
+        ViewBag.WebSocketServer = _configuration["WebSocketServer"];
+
+        return View();
     }
 }
