@@ -6,6 +6,7 @@ using eDoctor.Models.ViewModels.Meeting;
 using eDoctor.Results;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Text.Json;
 
 namespace eDoctor.Areas.Doctor.Controllers;
 
@@ -14,11 +15,13 @@ public class MeetingController : Controller
 {
     private readonly IMeetingService _meetingService;
     private readonly IConfiguration _configuration;
+    private readonly IHttpClientFactory _httpClientFactory;
 
-    public MeetingController(IMeetingService meetingService, IConfiguration configuration)
+    public MeetingController(IMeetingService meetingService, IConfiguration configuration, IHttpClientFactory httpClientFactory)
     {
         _meetingService = meetingService;
         _configuration = configuration;
+        _httpClientFactory = httpClientFactory;
     }
 
     [HttpGet]
@@ -41,9 +44,28 @@ public class MeetingController : Controller
             return RedirectToAction("Index", "Home");
         }
 
-        ViewBag.Username = _configuration["Metered:Username"];
-        ViewBag.Password = _configuration["Metered:Password"];
-
         return View(vm);
+    }
+
+    [HttpGet]
+    [Authorize(Roles = RoleTypes.Doctor)]
+    public async Task<IActionResult> GetTurn()
+    {
+        var client = _httpClientFactory.CreateClient();
+
+        var url = $"https://e-doctor.metered.live/api/v1/turn/credential?secretKey={_configuration["Metered:SecretKey"]}";
+
+        var response = await client.PostAsJsonAsync(url, new
+        {
+            expiryInSeconds = 3600
+        });
+
+        var content = await response.Content.ReadFromJsonAsync<JsonElement>();
+
+        return Ok(new
+        {
+            Username = content.GetProperty("username").GetString(),
+            Password = content.GetProperty("password").GetString()
+        });
     }
 }

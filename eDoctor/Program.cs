@@ -124,6 +124,9 @@ builder.Services.AddQuartzHostedService(options =>
     options.WaitForJobsToComplete = true;
 });
 
+// HttpClient
+builder.Services.AddHttpClient();
+
 
 WebApplication app = builder.Build();
 

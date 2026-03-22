@@ -63,6 +63,10 @@
         </div>
     </div>
 
+    <form id="join-antiForgeryForm">
+        @Html.AntiForgeryToken()
+    </form>
+
     <script src="~/lib/bootstrap/js/bootstrap.bundle.min.js"></script>
     <script src="~/lib/microsoft-signalr/signalr.min.js"></script>
     <script src="~/lib/simple-peer/simplepeer.min.js"></script>
@@ -75,6 +79,10 @@
         let connected = false;
         let camOn = false;
         let micOn = true;
+        let username = null;
+        let credential = null;
+
+        const joinToken = document.querySelector('#join-antiForgeryForm input[name="__RequestVerificationToken"]').value;
 
         function showError(msg) {
             document.getElementById('toastMsg').textContent = msg;
@@ -143,23 +151,23 @@
                         },
                         {
                             urls: "turn:global.relay.metered.ca:80",
-                            username: "@ViewBag.Username",
-                            credential: "@ViewBag.Password"
+                            username,
+                            credential
                         },
                         {
                             urls: "turn:global.relay.metered.ca:80?transport=tcp",
-                            username: "@ViewBag.Username",
-                            credential: "@ViewBag.Password"
+                            username,
+                            credential
                         },
                         {
                             urls: "turn:global.relay.metered.ca:443",
-                            username: "@ViewBag.Username",
-                            credential: "@ViewBag.Password"
+                            username,
+                            credential
                         },
                         {
                             urls: "turns:global.relay.metered.ca:443?transport=tcp",
-                            username: "@ViewBag.Username",
-                            credential: "@ViewBag.Password"
+                            username,
+                            credential
                         }
                     ]
                 }
@@ -245,6 +253,17 @@
 
         async function init() {
             try {
+                const res = await fetch("/Meeting/GetTurn", {
+                    headers: {
+                        "RequestVerificationToken": joinToken
+                    },
+                    credentials: "include"
+                })
+
+                const data = await res.json()
+                username = data.username
+                credential = data.password
+
                 localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
                 document.getElementById('localVideo').srcObject = localStream;
 
