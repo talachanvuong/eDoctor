@@ -121,7 +121,7 @@ public class MedicalRecordService : IMedicalRecordService
 
         if (!await _context.Schedules.AnyAsync(s => s.ScheduleId == dto.ScheduleId && s.UserId == dto.Id))
         {
-            return Result<MedicalRecordDto>.Failure("You are not allowed to access this appointment.");
+            return Result<MedicalRecordDto>.Failure("You are not allowed to access this medical record.");
         }
 
         DetailMedicalRecordDto detailMedicalRecord = await _context.MedicalRecords

@@ -41,8 +41,8 @@ public class ApplicationDbContext : DbContext
             .IsUnique();
 
         modelBuilder.Entity<Section>()
-           .HasIndex(s => s.SectionTitle)
-           .IsUnique();
+            .HasIndex(s => s.SectionTitle)
+            .IsUnique();
 
         modelBuilder.Entity<Section>()
             .HasIndex(s => s.SectionOrder)
@@ -53,12 +53,12 @@ public class ApplicationDbContext : DbContext
             .IsUnique();
 
         modelBuilder.Entity<Invoice>()
-           .HasIndex(i => i.OrderId)
-           .IsUnique();
+            .HasIndex(i => i.OrderId)
+            .IsUnique();
 
         modelBuilder.Entity<Schedule>()
-           .HasIndex(s => s.Room)
-           .IsUnique();
+            .HasIndex(s => s.Room)
+            .IsUnique();
 
         modelBuilder.Entity<Schedule>()
             .ToTable(t => t.HasCheckConstraint(
@@ -67,7 +67,7 @@ public class ApplicationDbContext : DbContext
             ));
 
         modelBuilder.Entity<Schedule>()
-           .HasIndex(s => new { s.DoctorId, s.UserId });
+            .HasIndex(s => new { s.DoctorId, s.UserId });
 
         modelBuilder.Entity<Service>()
             .Property(s => s.Price)
